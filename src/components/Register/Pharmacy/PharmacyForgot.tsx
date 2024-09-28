@@ -66,54 +66,56 @@ const PharmacyForgotPasswordRequest: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow">
-            <div className="card-body">
-              <h2 className="card-title text-center mb-4">Forgot Password</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", { required: "Email is required" })} // Apply validation
-                  />
-                  {errors.email && (
-                    <div className="invalid-feedback">
-                      {errors.email.message}
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center mb-4">Forgot Password</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", { required: "Email is required" })} // Apply validation
+                    />
+                    {errors.email && (
+                      <div className="invalid-feedback">
+                        {errors.email.message}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Success Message */}
+                  {successMessage && (
+                    <div className="alert alert-success" role="alert">
+                      {successMessage}
                     </div>
                   )}
-                </div>
 
-                {/* Success Message */}
-                {successMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {successMessage}
+                  {/* Error Message */}
+                  {errorMessage && (
+                    <div className="alert alert-danger" role="alert">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="d-grid">
+                    <button
+                      type="submit"
+                      className="btn btn-primary mb-3"
+                      disabled={isLoading}>
+                      {isLoading ? "Sending..." : "Request OTP"}
+                    </button>
                   </div>
-                )}
-
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary mb-3"
-                    disabled={isLoading}>
-                    {isLoading ? "Sending..." : "Request OTP"}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>

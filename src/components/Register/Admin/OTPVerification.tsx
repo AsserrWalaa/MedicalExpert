@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Button } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 
 // Define the validation schema using Zod
 const otpSchema = z.object({
@@ -29,10 +29,9 @@ const otpSchema = z.object({
 type OTPSchemaType = z.infer<typeof otpSchema>;
 
 const OTPVerification: React.FC = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalVariant, setModalVariant] = useState<"success" | "danger">(
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
     "success"
   );
 
@@ -43,8 +42,6 @@ const OTPVerification: React.FC = () => {
     setError,
   } = useForm<OTPSchemaType>();
   const navigate = useNavigate();
-
-  const handleClose = () => setShowModal(false);
 
   const onSubmit: SubmitHandler<OTPSchemaType> = async (data) => {
     const parsed = otpSchema.safeParse(data);
@@ -69,121 +66,112 @@ const OTPVerification: React.FC = () => {
 
       // Handle successful response
       if (response.status === 200) {
-        setModalTitle("Success");
-        setModalMessage("OTP verified and password reset successfully.");
-        setModalVariant("success");
-        setShowModal(true);
+        setAlertMessage("OTP verified and password reset successfully.");
+        setAlertVariant("success");
+        setAlertVisible(true);
 
         // Navigate to the sign-in page after success
         setTimeout(() => {
           navigate("/admin-signin");
-        });
+        }, 2000);
       } else {
         // Handle failure response
-        setModalTitle("Error");
-        setModalMessage("Failed to verify OTP or reset password.");
-        setModalVariant("danger");
-        setShowModal(true);
+        setAlertMessage("Failed to verify OTP or reset password.");
+        setAlertVariant("danger");
+        setAlertVisible(true);
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setModalTitle("Error");
-        setModalMessage("Invalid OTP. Please try again.");
-        setModalVariant("danger");
-        setShowModal(true);
+        setAlertMessage("Invalid OTP. Please try again.");
+        setAlertVariant("danger");
+        setAlertVisible(true);
       } else {
-        setModalTitle("Error");
-        setModalMessage("An unexpected error occurred.");
-        setModalVariant("danger");
-        setShowModal(true);
+        setAlertMessage("An unexpected error occurred.");
+        setAlertVariant("danger");
+        setAlertVisible(true);
       }
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">
-                Enter OTP and New Password
-              </h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email Input */}
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    {...register("email")}
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                  />
-                  <p className="text-danger">{errors.email?.message}</p>
-                </div>
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center">
+                  Enter OTP and New Password
+                </h2>
 
-                {/* OTP Input */}
-                <div className="mb-3">
-                  <label htmlFor="otp" className="form-label">
-                    OTP
-                  </label>
-                  <input
-                    type="text"
-                    id="otp"
-                    {...register("otp")}
-                    className={`form-control ${errors.otp ? "is-invalid" : ""}`}
-                  />
-                  <p className="text-danger">{errors.otp?.message}</p>
-                </div>
+                {/* Bootstrap Alert */}
+                {alertVisible && (
+                  <Alert
+                    variant={alertVariant}
+                    onClose={() => setAlertVisible(false)}
+                    dismissible>
+                    {alertMessage}
+                  </Alert>
+                )}
 
-                {/* Password Input */}
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    New Password
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    {...register("password")}
-                    className={`form-control ${
-                      errors.password ? "is-invalid" : ""
-                    }`}
-                  />
-                  <p className="text-danger">{errors.password?.message}</p>
-                </div>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email Input */}
+                  <div className="mb-3">
+                    <label htmlFor="email" className="form-label">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      {...register("email")}
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                    />
+                    <p className="text-danger">{errors.email?.message}</p>
+                  </div>
 
-                <button type="submit" className="btn btn-primary w-100">
-                  Verify OTP and Reset Password
-                </button>
-              </form>
+                  {/* OTP Input */}
+                  <div className="mb-3">
+                    <label htmlFor="otp" className="form-label">
+                      OTP
+                    </label>
+                    <input
+                      type="text"
+                      id="otp"
+                      {...register("otp")}
+                      className={`form-control ${
+                        errors.otp ? "is-invalid" : ""
+                      }`}
+                    />
+                    <p className="text-danger">{errors.otp?.message}</p>
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="mb-3">
+                    <label htmlFor="password" className="form-label">
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      {...register("password")}
+                      className={`form-control ${
+                        errors.password ? "is-invalid" : ""
+                      }`}
+                    />
+                    <p className="text-danger">{errors.password?.message}</p>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary w-100">
+                    Verify OTP and Reset Password
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal for showing messages */}
-      <Modal show={showModal} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>{modalTitle}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className={
-            modalVariant === "danger" ? "text-danger" : "text-success"
-          }>
-          {modalMessage}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            variant={modalVariant === "danger" ? "danger" : "success"}
-            onClick={handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

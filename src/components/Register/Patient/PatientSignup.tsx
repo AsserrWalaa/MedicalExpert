@@ -38,8 +38,7 @@ const PatientSignUp: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modalMessage, setModalMessage] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false); // Track success or failure
   const navigate = useNavigate();
 
@@ -73,15 +72,13 @@ const PatientSignUp: React.FC = () => {
       );
 
       if (response.data.status === "success") {
-        setModalMessage(
-          "Registration successful. Please complete registration."
-        );
+        setMessage("Registration successful. Please complete registration.");
         setIsSuccess(true);
         setTimeout(() => {
           navigate("/patient-reg-otp");
         }, 2000);
       } else {
-        setModalMessage(
+        setMessage(
           response.data.message || "Registration failed. Please try again."
         );
         setIsSuccess(false);
@@ -90,17 +87,16 @@ const PatientSignUp: React.FC = () => {
       console.error("Registration failed:", error);
       if (axios.isAxiosError(error) && error.response) {
         console.error("Response data:", error.response.data); // Log server response
-        setModalMessage(
+        setMessage(
           error.response.data.message ||
             "Registration failed. Please try again."
         );
       } else {
-        setModalMessage("Registration failed. Please try again.");
+        setMessage("Registration failed. Please try again.");
       }
       setIsSuccess(false);
     } finally {
       setLoading(false);
-      setShowModal(true);
     }
   };
 
@@ -111,8 +107,20 @@ const PatientSignUp: React.FC = () => {
           <div className="card">
             <div className="card-body">
               <h2 className="card-title text-center">Patient SignUp</h2>
+
+              {/* Alert Message */}
+              {message && (
+                <div
+                  className={`alert ${
+                    isSuccess ? "alert-success" : "alert-danger"
+                  }`}
+                  role="alert">
+                  {message}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit(onSubmit)}>
-                {/* patientName */}
+                {/* Patient Name */}
                 <div className="mb-3">
                   <label className="form-label">Patient Name</label>
                   <input
@@ -120,7 +128,9 @@ const PatientSignUp: React.FC = () => {
                     className={`form-control ${
                       errors.patientName ? "is-invalid" : ""
                     }`}
-                    {...register("patientName", { required: true })}
+                    {...register("patientName", {
+                      required: "Name is required",
+                    })}
                   />
                   {errors.patientName && (
                     <p className="text-danger">{errors.patientName.message}</p>
@@ -135,20 +145,24 @@ const PatientSignUp: React.FC = () => {
                     className={`form-control ${
                       errors.email ? "is-invalid" : ""
                     }`}
-                    {...register("email", { required: true })}
+                    {...register("email", {
+                      required: "Email is required",
+                    })}
                   />
                   {errors.email && (
                     <p className="text-danger">{errors.email.message}</p>
                   )}
                 </div>
 
-                {/* patientID */}
+                {/* Patient ID */}
                 <div className="mb-3">
                   <label className="form-label">Patient ID</label>
                   <input
                     type="text"
                     className={`form-control ${errors.SSN ? "is-invalid" : ""}`}
-                    {...register("SSN", { required: true })}
+                    {...register("SSN", {
+                      required: "ID is required",
+                    })}
                   />
                   {errors.SSN && (
                     <p className="text-danger">{errors.SSN.message}</p>
@@ -164,7 +178,9 @@ const PatientSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.password ? "is-invalid" : ""
                       }`}
-                      {...register("password", { required: true })}
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
                     />
                     <button
                       type="button"
@@ -187,7 +203,9 @@ const PatientSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.confirmPassword ? "is-invalid" : ""
                       }`}
-                      {...register("confirmPassword", { required: true })}
+                      {...register("confirmPassword", {
+                        required: "Confirm password",
+                      })}
                     />
                     <button
                       type="button"
@@ -229,50 +247,6 @@ const PatientSignUp: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Enhanced Modal */}
-      {showModal && (
-        <div
-          className="modal fade show"
-          tabIndex={-1}
-          style={{ display: "block" }}
-          role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">
-                  {isSuccess ? "Success" : "Failure"}
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close"
-                />
-              </div>
-              <div className="modal-body">
-                <p>{modalMessage}</p>
-              </div>
-              <div className="modal-footer d-flex">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => setShowModal(false)}>
-                  Close
-                </button>
-                {isSuccess && (
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={() => navigate("/patient-reg-otp")}>
-                    Complete Registration
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

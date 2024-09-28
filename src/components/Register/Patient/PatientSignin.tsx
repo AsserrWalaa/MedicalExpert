@@ -11,14 +11,7 @@ const schema = z.object({
     .string()
     .email("Please enter a valid email address")
     .nonempty("Email is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-    .regex(/[a-z]/, "Password must have at least one lowercase letter")
-    .regex(/\d/, "Password must have at least one number")
-    .regex(/[@$!%*?&#]/, "Password must have at least one special character")
-    .nonempty("Password is required"),
+  password: z.string().nonempty("Password is required"),
 });
 
 // Type inferred from the schema
@@ -28,6 +21,7 @@ const PatientSignIn: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
   const {
@@ -35,15 +29,12 @@ const PatientSignIn: React.FC = () => {
     handleSubmit,
     formState: { errors },
   } = useForm<SchemaType>({
-    // Integrate Zod validation schema with react-hook-form
     resolver: async (values) => {
       try {
-        // Validate values using Zod schema
         schema.parse(values);
         return { values, errors: {} };
       } catch (err) {
         if (err instanceof z.ZodError) {
-          // Return validation errors
           const fieldErrors = err.errors.reduce((acc, curr) => {
             acc[curr.path[0]] = { message: curr.message };
             return acc;
@@ -56,16 +47,15 @@ const PatientSignIn: React.FC = () => {
   });
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
+    setLoading(true); // Set loading to true
     try {
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/patient/login",
         {
-          email: data.email, // Use email instead of SSN
+          email: data.email,
           password: data.password,
         }
       );
-
-      console.log("API Response:", response.data);
 
       if (response.data.status === "success") {
         localStorage.setItem("token", response.data.token);
@@ -76,22 +66,11 @@ const PatientSignIn: React.FC = () => {
         setErrorMessage(response.data.message || "Invalid email or password.");
         setSuccessMessage(null);
       }
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        console.error("API Error:", error.response);
-        setErrorMessage("Incorrect email or password.");
-        setSuccessMessage(null);
-      } else if (error instanceof Error) {
-        console.error("General Error:", error.message);
-        setErrorMessage(
-          error.message || "An unexpected error occurred. Please try again."
-        );
-        setSuccessMessage(null);
-      } else {
-        console.error("Unknown Error:", error);
-        setErrorMessage("An unexpected error occurred. Please try again.");
-        setSuccessMessage(null);
-      }
+    } catch (error) {
+      setErrorMessage("An unexpected error occurred. Please try again.");
+      setSuccessMessage(null);
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
@@ -103,10 +82,20 @@ const PatientSignIn: React.FC = () => {
             <div className="card-body">
               <h2 className="card-title text-center">Patient Sign In</h2>
               {errorMessage && (
-                <div className="alert alert-danger">{errorMessage}</div>
+                <div
+                  className="alert alert-danger"
+                  role="alert"
+                  aria-live="assertive">
+                  {errorMessage}
+                </div>
               )}
               {successMessage && (
-                <div className="alert alert-success">{successMessage}</div>
+                <div
+                  className="alert alert-success"
+                  role="alert"
+                  aria-live="assertive">
+                  {successMessage}
+                </div>
               )}
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Email */}
@@ -117,7 +106,9 @@ const PatientSignIn: React.FC = () => {
                     className={`form-control ${
                       errors.email ? "is-invalid" : ""
                     }`}
-                    {...register("email")}
+                    {...register("email", {
+                      required: "Email is required",
+                    })}
                   />
                   <div className="invalid-feedback">
                     {errors.email?.message}
@@ -133,7 +124,9 @@ const PatientSignIn: React.FC = () => {
                       className={`form-control ${
                         errors.password ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
                     />
                     <button
                       type="button"
@@ -149,8 +142,11 @@ const PatientSignIn: React.FC = () => {
 
                 {/* Sign In Button */}
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Sign In
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={loading}>
+                    {loading ? "Signing In..." : "Sign In"}
                   </button>
                 </div>
 

@@ -4,8 +4,9 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Button } from "react-bootstrap";
+import "../../index.css";
 
+// Zod schema for form validation
 const schema = z.object({
   email: z.string().email("Invalid email format").nonempty("Email is required"),
   otp: z.string().nonempty("OTP is required"),
@@ -27,13 +28,8 @@ const DoctorReset: React.FC = () => {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalVariant, setModalVariant] = useState<"success" | "danger">(
-    "success"
-  );
-
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const {
@@ -63,138 +59,148 @@ const DoctorReset: React.FC = () => {
         apiData
       );
 
-      // Optionally log the response for debugging
       console.log("Response data:", response.data);
 
-      setModalTitle("Success");
-      setModalMessage("Password reset successful!");
-      setModalVariant("success");
-      setShowModal(true);
-      navigate("/doctor-signin");
+      // Show success message and reset form
+      setSuccessMessage("Password reset successful!");
+      setErrorMessage(null);
+      setPasswordsMatch(true);
+      setLoading(false);
+
+      // Redirect after a delay
+      setTimeout(() => {
+        navigate("/doctor-signin");
+      }, 2000);
     } catch (error) {
-      setModalTitle("Error");
-      setModalMessage("Failed to reset password. Please try again.");
-      setModalVariant("danger");
-      setShowModal(true);
-    } finally {
+      setErrorMessage("Failed to reset password. Please try again.");
+      setSuccessMessage(null);
       setLoading(false);
     }
   };
 
-  const handleCloseModal = () => setShowModal(false);
-
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title text-center">Reset Password</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center">Reset Password</h2>
+
+                {/* Success Alert */}
+                {successMessage && (
+                  <div className="alert alert-success text-center" role="alert">
+                    {successMessage}
                   </div>
-                </div>
+                )}
 
-                <div className="mb-3">
-                  <label className="form-label">OTP</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.otp ? "is-invalid" : ""}`}
-                    {...register("otp")}
-                  />
-                  <div className="invalid-feedback">{errors.otp?.message}</div>
-                </div>
+                {/* Error Alert */}
+                {errorMessage && (
+                  <div className="alert alert-danger text-center" role="alert">
+                    {errorMessage}
+                  </div>
+                )}
 
-                <div className="mb-3">
-                  <label className="form-label">New Password</label>
-                  <div className="input-group">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="email"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
                     />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">OTP</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.otp ? "is-invalid" : ""
+                      }`}
+                      {...register("otp", {
+                        required: "Otp is required",
+                      })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.otp?.message}
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">New Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: " password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="form-label">Confirm Password</label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        {...register("confirmPassword", {
+                          required: "Confirm password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }>
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.confirmPassword?.message}
+                    </div>
+                    {!passwordsMatch && (
+                      <div className="text-danger">Passwords must match</div>
+                    )}
+                  </div>
+
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Resetting Password..." : "Reset Password"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-group">
-                    <input
-                      type={confirmPasswordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        errors.confirmPassword ? "is-invalid" : ""
-                      }`}
-                      {...register("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }>
-                      {confirmPasswordVisible ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  <div className="invalid-feedback">
-                    {errors.confirmPassword?.message}
-                  </div>
-                  {!passwordsMatch && (
-                    <div className="text-danger">Passwords must match</div>
-                  )}
-                </div>
-
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Resetting Password..." : "Reset Password"}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal */}
-      <Modal show={showModal} onHide={handleCloseModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>{modalTitle}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body
-          className={
-            modalVariant === "danger" ? "text-danger" : "text-success"
-          }>
-          {modalMessage}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

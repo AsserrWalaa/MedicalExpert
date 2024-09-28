@@ -57,73 +57,79 @@ const ResetPassword: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center mb-4">Reset Password</h2>
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center mb-4">Reset Password</h2>
 
-              {showAlert && (
-                <div
-                  className="alert alert-success d-flex align-items-center"
-                  role="alert">
-                  <CheckCircle className="me-2" /> {/* Checkmark icon */}
-                  <div>Password reset successfully!</div>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    New Password
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type={passwordVisible ? "text" : "password"}
-                      id="password"
-                      {...register("password")}
-                      className="form-control"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPasswordVisible(!passwordVisible)}
-                      className="btn btn-outline-secondary">
-                      {passwordVisible ? "Hide" : "Show"}
-                    </button>
+                {showAlert && (
+                  <div
+                    className="alert alert-success d-flex align-items-center"
+                    role="alert">
+                    <CheckCircle className="me-2" /> {/* Checkmark icon */}
+                    <div>Password reset successfully!</div>
                   </div>
-                  <p className="text-danger">{errors.password?.message}</p>
-                </div>
+                )}
 
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">
-                    Confirm New Password
-                  </label>
-                  <div className="input-group">
-                    <input
-                      type={confirmPasswordVisible ? "text" : "password"}
-                      id="confirmPassword"
-                      {...register("confirmPassword")}
-                      className="form-control"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }
-                      className="btn btn-outline-secondary">
-                      {confirmPasswordVisible ? "Hide" : "Show"}
-                    </button>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mb-3">
+                    <label htmlFor="password" className="form-label">
+                      New Password
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        id="password"
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                        className="form-control"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPasswordVisible(!passwordVisible)}
+                        className="btn btn-outline-secondary">
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <p className="text-danger">{errors.password?.message}</p>
                   </div>
-                  <p className="text-danger">
-                    {errors.confirmPassword?.message}
-                  </p>
-                </div>
 
-                <button type="submit" className="btn btn-primary w-100">
-                  Reset Password
-                </button>
-              </form>
+                  <div className="mb-3">
+                    <label htmlFor="confirmPassword" className="form-label">
+                      Confirm New Password
+                    </label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        id="confirmPassword"
+                        {...register("confirmPassword", {
+                          required: "Confirm password is required",
+                        })}
+                        className="form-control"
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }
+                        className="btn btn-outline-secondary">
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <p className="text-danger">
+                      {errors.confirmPassword?.message}
+                    </p>
+                  </div>
+
+                  <button type="submit" className="btn btn-primary w-100">
+                    Reset Password
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>

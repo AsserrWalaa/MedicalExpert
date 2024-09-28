@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -22,29 +22,18 @@ const PatientOTPVerification: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch, // Use watch to access form values
   } = useForm<OTPFormInputs>({
     defaultValues: {
       email: initialEmail, // Set initial value of email field
     },
   });
-  const [timeLeft, setTimeLeft] = useState(10); // OTP expiration countdown
-  const [resendDisabled, setResendDisabled] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
-  // Countdown logic for OTP expiration
-  useEffect(() => {
-    if (timeLeft === 0) {
-      setResendDisabled(false);
-    } else {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [timeLeft]);
-
   const onSubmit: SubmitHandler<OTPFormInputs> = async (data) => {
+    setLoading(true); // Start loading
     try {
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/patient/verify",
@@ -55,6 +44,7 @@ const PatientOTPVerification: React.FC = () => {
       );
 
       if (response.data.status === "success") {
+        setSuccessMessage("OTP verified successfully!"); // Set success message
         navigate("/patient-home");
       } else {
         setErrorMessage(response.data.message || "OTP verification failed.");
@@ -63,57 +53,14 @@ const PatientOTPVerification: React.FC = () => {
       if (axios.isAxiosError(error) && error.response) {
         const errorData = error.response.data;
         // Handle error response
-        if (Array.isArray(errorData.errors)) {
-          setErrorMessage(
-            errorData.errors.map((err: { msg: string }) => err.msg).join(", ")
-          );
-        } else if (typeof errorData.message === "string") {
-          setErrorMessage(errorData.message);
-        } else {
-          setErrorMessage(
-            `Error: ${error.response.status} - ${error.response.statusText}`
-          );
-        }
+        setErrorMessage(
+          errorData.message || "Error verifying OTP. Please try again."
+        );
       } else {
         setErrorMessage("Error verifying OTP. Please try again.");
       }
-    }
-  };
-
-  const resendOTP = async () => {
-    try {
-      const email = watch("email"); // Use watch to get the email value
-      const response = await axios.post(
-        "https://admin.medicalexpertise.net/api/patient/get-otp",
-        {
-          email: email, // Include email in request
-        }
-      );
-      if (response.data.status === "success") {
-        setSuccessMessage("A new OTP has been sent to your email.");
-        setResendDisabled(true);
-        setTimeLeft(10); // Reset countdown
-      } else {
-        setErrorMessage(response.data.message || "Failed to resend OTP.");
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
-        // Handle error response
-        if (Array.isArray(errorData.errors)) {
-          setErrorMessage(
-            errorData.errors.map((err: { msg: string }) => err.msg).join(", ")
-          );
-        } else if (typeof errorData.message === "string") {
-          setErrorMessage(errorData.message);
-        } else {
-          setErrorMessage(
-            `Error: ${error.response.status} - ${error.response.statusText}`
-          );
-        }
-      } else {
-        setErrorMessage("Error resending OTP. Please try again.");
-      }
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -125,10 +72,14 @@ const PatientOTPVerification: React.FC = () => {
             <div className="card-body">
               <h2 className="card-title text-center">Verify OTP</h2>
               {errorMessage && (
-                <div className="alert alert-danger">{errorMessage}</div>
+                <div className="alert alert-danger" role="alert">
+                  {errorMessage}
+                </div>
               )}
               {successMessage && (
-                <div className="alert alert-success">{successMessage}</div>
+                <div className="alert alert-success" role="alert">
+                  {successMessage}
+                </div>
               )}
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Email Input */}
@@ -169,21 +120,14 @@ const PatientOTPVerification: React.FC = () => {
 
                 {/* Submit Button */}
                 <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Verify
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={loading}>
+                    {loading ? "Verifying..." : "Verify OTP"}
                   </button>
                 </div>
               </form>
-
-              {/* Resend OTP */}
-              <div className="text-center mt-3">
-                <button
-                  className="btn btn-link"
-                  onClick={resendOTP}
-                  disabled={resendDisabled}>
-                  {resendDisabled ? `Resend OTP in ${timeLeft}s` : "Resend OTP"}
-                </button>
-              </div>
             </div>
           </div>
         </div>

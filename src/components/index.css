@@ -1,3 +1,12 @@
-body {
-  padding: 20px;
+.backgound {
+  background-image: url(../assets/imgs/capsulation.png);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  background-color: rgba(0, 123, 255, 0.1);
+  z-index: -1;
 }

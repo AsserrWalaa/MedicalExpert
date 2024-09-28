@@ -82,126 +82,131 @@ const PharmacySignUp: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Pharmacy Sign Up</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Pharmacy Name */}
-                <div className="mb-3">
-                  <label className="form-label">Pharmacy Name</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.pharmacyName ? "is-invalid" : ""
-                    }`}
-                    {...register("pharmacyName")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.pharmacyName?.message}
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
-                  </div>
-                </div>
-
-                {/* Pharmacy ID */}
-                <div className="mb-3">
-                  <label className="form-label">Pharmacy ID</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.pharmacyId ? "is-invalid" : ""
-                    }`}
-                    {...register("pharmacyId")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.pharmacyId?.message}
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center">Pharmacy Sign Up</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Pharmacy Name */}
+                  <div className="mb-3">
+                    <label className="form-label">Pharmacy Name</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="text"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.pharmacyName ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("pharmacyName", {
+                        required: "Pharmacy name is required",
+                      })}
+                      disabled={loading} // Disable input when loading
                     />
+                    <div className="invalid-feedback">
+                      {errors.pharmacyName?.message}
+                    </div>
+                  </div>
+
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email")}
+                      disabled={loading} // Disable input when loading
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  {/* Pharmacy ID */}
+                  <div className="mb-3">
+                    <label className="form-label">Pharmacy ID</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.pharmacyId ? "is-invalid" : ""
+                      }`}
+                      {...register("pharmacyId", {
+                        required: "ID is required",
+                      })}
+                      disabled={loading} // Disable input when loading
+                    />
+                    <div className="invalid-feedback">
+                      {errors.pharmacyId?.message}
+                    </div>
+                  </div>
+
+                  {/* New Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                        disabled={loading} // Disable input when loading
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Confirm Password</label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        {...register("confirmPassword", {
+                          required: "Confirm password",
+                        })}
+                        disabled={loading} // Disable input when loading
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }>
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.confirmPassword?.message}
+                    </div>
+                  </div>
+
+                  {/* Sign Up Button */}
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
-                  </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div className="mb-3">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-group">
-                    <input
-                      type={confirmPasswordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        errors.confirmPassword ? "is-invalid" : ""
-                      }`}
-                      {...register("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }>
-                      {confirmPasswordVisible ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  <div className="invalid-feedback">
-                    {errors.confirmPassword?.message}
-                  </div>
-                </div>
-
-                {/* Sign Up Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Signing Up..." : "Sign Up"}
-                  </button>
-                </div>
-
-                {/* Navigate to Sign In */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/pharmacy-signin")}>
-                    Already have an account? Sign In
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>

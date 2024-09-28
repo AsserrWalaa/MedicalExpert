@@ -86,88 +86,94 @@ const AdminSignIn: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Admin Sign In</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
-                  </div>
-                </div>
-
-                {/* Password */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center">Admin Sign In</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="email"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
                     />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  {/* Remember Me */}
+                  <div className="mb-3 form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input"
+                      {...register}
+                    />
+                    <label className="form-check-label">Remember Me</label>
+                  </div>
+
+                  {/* Sign In Button */}
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing In..." : "Sign In"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
+
+                  {/* Error Message */}
+                  {errorMessage && (
+                    <div className="text-danger text-center mt-3">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  {/* Forgot Password */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/admin-forgot")}>
+                      Forgot Password?
+                    </button>
                   </div>
-                </div>
-
-                {/* Remember Me */}
-                <div className="mb-3 form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input"
-                    {...register}
-                  />
-                  <label className="form-check-label">Remember Me</label>
-                </div>
-
-                {/* Sign In Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Signing In..." : "Sign In"}
-                  </button>
-                </div>
-
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="text-danger text-center mt-3">
-                    {errorMessage}
-                  </div>
-                )}
-
-                {/* Forgot Password */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/admin-forgot")}>
-                    Forgot Password?
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>

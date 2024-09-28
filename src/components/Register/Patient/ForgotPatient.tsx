@@ -43,7 +43,7 @@ const PatientForgotPasswordEmail: React.FC = () => {
       if (response.data) {
         // Display success message and navigate on success
         setSuccessMessage("OTP has been sent to your email.");
-        navigate("/patient-forgot-otp"); // Redirect after 2 seconds
+        navigate("/patient-forgot-otp"); // Redirect after success
       } else {
         // Display error message if the email is invalid or OTP not sent
         setErrorMessage(
@@ -75,6 +75,21 @@ const PatientForgotPasswordEmail: React.FC = () => {
           <div className="card">
             <div className="card-body">
               <h2 className="card-title text-center">Forgot Password</h2>
+
+              {/* Success Message */}
+              {successMessage && (
+                <div className="alert alert-success" role="alert">
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Error Message */}
+              {errorMessage && (
+                <div className="alert alert-danger" role="alert">
+                  {errorMessage}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Email */}
                 <div className="mb-3">
@@ -84,27 +99,14 @@ const PatientForgotPasswordEmail: React.FC = () => {
                     className={`form-control ${
                       errors.email ? "is-invalid" : ""
                     }`}
-                    {...register("email", { required: true })}
-                    required
+                    {...register("email", {
+                      required: "Email is required",
+                    })}
                   />
                   <div className="invalid-feedback">
                     {errors.email?.message}
                   </div>
                 </div>
-
-                {/* Success Message */}
-                {successMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {successMessage}
-                  </div>
-                )}
-
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}
 
                 {/* Submit Button */}
                 <div className="d-grid">

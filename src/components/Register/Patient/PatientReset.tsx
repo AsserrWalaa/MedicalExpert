@@ -22,6 +22,8 @@ type SchemaType = z.infer<typeof schema>;
 const PasswordResetComponent: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -38,8 +40,18 @@ const PasswordResetComponent: React.FC = () => {
       });
       return;
     }
-    // Password reset logic here
-    console.log("Password reset data:", data);
+
+    // Simulate password reset logic here
+    // For demonstration purposes, let's assume the reset was successful
+    const isSuccess = true; // Replace this with actual success condition
+
+    if (isSuccess) {
+      setSuccessMessage("Password has been reset successfully.");
+      setErrorMessage(null); // Clear any previous error message
+    } else {
+      setErrorMessage("Failed to reset the password. Please try again.");
+      setSuccessMessage(null); // Clear any previous success message
+    }
   };
 
   return (
@@ -49,6 +61,21 @@ const PasswordResetComponent: React.FC = () => {
           <div className="card">
             <div className="card-body">
               <h2 className="card-title text-center">Reset Password</h2>
+
+              {/* Success Message */}
+              {successMessage && (
+                <div className="alert alert-success" role="alert">
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Error Message */}
+              {errorMessage && (
+                <div className="alert alert-danger" role="alert">
+                  {errorMessage}
+                </div>
+              )}
+
               <form onSubmit={handleSubmit(onSubmit)}>
                 {/* New Password */}
                 <div className="mb-3">
@@ -59,7 +86,9 @@ const PasswordResetComponent: React.FC = () => {
                       className={`form-control ${
                         errors.password ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("password", {
+                        required: "Password is required",
+                      })}
                     />
                     <button
                       type="button"

@@ -22,6 +22,8 @@ type SchemaType = z.infer<typeof schema>;
 const PasswordResetComponent: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -38,77 +40,107 @@ const PasswordResetComponent: React.FC = () => {
       });
       return;
     }
-    // Password reset logic here
+
+    // Password reset logic here (API call)
     console.log("Password reset data:", data);
+
+    // Simulating success response
+    setSuccessMessage("Your password has been reset successfully!");
+    setErrorMessage(null); // Clear any previous error messages
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Reset Password</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* New Password */}
-                <div className="mb-3">
-                  <label className="form-label">New Password</label>
-                  <div className="input-group">
-                    <input
-                      type={passwordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        errors.password ? "is-invalid" : ""
-                      }`}
-                      {...register("password")}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center">Reset Password</h2>
+
+                {/* Error Message Alert */}
+                {errorMessage && (
+                  <div
+                    className="alert alert-danger alert-dismissible fade show"
+                    role="alert">
+                    {errorMessage}
+                  </div>
+                )}
+
+                {/* Success Message Alert */}
+                {successMessage && (
+                  <div
+                    className="alert alert-success alert-dismissible fade show"
+                    role="alert">
+                    {successMessage}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* New Password */}
+                  <div className="mb-3">
+                    <label className="form-label">New Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-danger mt-2">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Confirm New Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Confirm New Password</label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        {...register("confirmPassword", {
+                          required: "Confirm password",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }>
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-danger mt-2">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Reset Password Button */}
+                  <div className="d-grid">
+                    <button type="submit" className="btn btn-primary">
+                      Reset Password
                     </button>
                   </div>
-                  {errors.password && (
-                    <p className="text-danger mt-2">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Confirm New Password */}
-                <div className="mb-3">
-                  <label className="form-label">Confirm New Password</label>
-                  <div className="input-group">
-                    <input
-                      type={confirmPasswordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        errors.confirmPassword ? "is-invalid" : ""
-                      }`}
-                      {...register("confirmPassword")}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }>
-                      {confirmPasswordVisible ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  {errors.confirmPassword && (
-                    <p className="text-danger mt-2">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Reset Password Button */}
-                <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Reset Password
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>

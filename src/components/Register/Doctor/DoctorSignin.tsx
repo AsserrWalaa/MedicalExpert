@@ -4,23 +4,16 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
   email: z
     .string()
-    .email("Please enter a valid email")
-    .nonempty("Email is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-    .regex(/[a-z]/, "Password must have at least one lowercase letter")
-    .regex(/\d/, "Password must have at least one number")
-    .regex(/[@$!%*?&#]/, "Password must have at least one special character")
-    .nonempty("Password is required"),
+    .email("Please enter a valid email address.")
+    .nonempty("Email is required."),
+  password: z.string().nonempty("Password is required."),
 });
-
 // Type inferred from the schema
 type SchemaType = z.infer<typeof schema>;
 
@@ -62,91 +55,100 @@ const DoctorSignIn: React.FC = () => {
         console.error("API Error:", error.response);
         setErrorMessage("Incorrect email or password.");
         setSuccessMessage(null);
-      } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
-        setSuccessMessage(null);
       }
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title text-center">Doctor SignIn</h2>
-              {errorMessage && (
-                <div className="alert alert-danger">{errorMessage}</div>
-              )}
-              {successMessage && (
-                <div className="alert alert-success">{successMessage}</div>
-              )}
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email Input */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
-                  </div>
-                </div>
-
-                {/* Password Input */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center">Doctor SignIn</h2>
+                {errorMessage && (
+                  <div className="alert alert-danger">{errorMessage}</div>
+                )}
+                {successMessage && (
+                  <div className="alert alert-success">{successMessage}</div>
+                )}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="email"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("password")}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
                     />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                    {/* Show validation error message */}
+                    {errors.email && (
+                      <div className="invalid-feedback">
+                        {errors.email.message}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {/* Show validation error message */}
+                    {errors.password && (
+                      <div className="invalid-feedback">
+                        {errors.password.message}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Sign In Button */}
+                  <div className="d-grid mb-3">
+                    <button type="submit" className="btn btn-primary">
+                      SignIn
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
-                  </div>
-                </div>
+                </form>
 
-                {/* Sign In Button */}
-                <div className="d-grid mb-3">
-                  <button type="submit" className="btn btn-primary">
-                    Sign In
+                {/* Forgot Password Link */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="btn btn-link"
+                    onClick={() => navigate("/doctor-forgot")}>
+                    Forgot Password?
                   </button>
                 </div>
-              </form>
 
-              {/* Forgot Password Link */}
-              <div className="text-center">
-                <button
-                  type="button"
-                  className="btn btn-link"
-                  onClick={() => navigate("/doctor-forgot")}>
-                  Forgot Password?
-                </button>
-              </div>
-
-              {/* Sign Up Link */}
-              <div className="text-center">
-                <button
-                  type="button"
-                  className="btn btn-link"
-                  onClick={() => navigate("/doctor-signup")}>
-                  Don't have an account?
-                </button>
+                {/* Sign Up Link */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    className="btn btn-link"
+                    onClick={() => navigate("/doctor-signup")}>
+                    Don't have an account?
+                  </button>
+                </div>
               </div>
             </div>
           </div>

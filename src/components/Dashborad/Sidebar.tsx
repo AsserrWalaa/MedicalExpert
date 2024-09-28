@@ -123,7 +123,6 @@ export default function PersistentDrawerLeft() {
 
   const handleLogout = () => {
     console.log("User logged out");
-    navigate("/"); // Example logout action
   };
 
   const menuItems = [

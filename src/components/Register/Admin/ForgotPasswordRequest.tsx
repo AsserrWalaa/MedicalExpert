@@ -3,7 +3,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Modal, Button } from "react-bootstrap"; // Import Modal and Button
 import "bootstrap/dist/css/bootstrap.min.css";
 
 // Define the validation schema using Zod
@@ -18,8 +17,10 @@ type SchemaType = z.infer<typeof schema>;
 
 const ForgotPasswordRequest: React.FC = () => {
   const navigate = useNavigate();
-  const [modalMessage, setModalMessage] = useState<string | null>(null); // State to hold modal message
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
+    "success"
+  );
 
   const {
     register,
@@ -36,18 +37,20 @@ const ForgotPasswordRequest: React.FC = () => {
       // Make API call to send OTP
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/admin/password/forgot",
-        { email: data.email } // Send email in the request body
+        { email: data.email }
       );
 
       if (response.status === 200) {
-        // Success - show modal with success message
-        setModalMessage(`OTP sent successfully to: ${data.email}`);
-        setShowModal(true);
-        navigate("/admin-otp"); // Navigate after 2 seconds
+        setAlertMessage(`OTP sent successfully to: ${data.email}`);
+        setAlertVariant("success");
+
+        // Navigate to OTP page after a delay
+        setTimeout(() => {
+          navigate("/admin-otp");
+        }, 2000);
       } else {
-        // API failed
-        setModalMessage("Failed to send OTP. Please try again.");
-        setShowModal(true);
+        setAlertMessage("Failed to send OTP. Please try again.");
+        setAlertVariant("danger");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -58,10 +61,10 @@ const ForgotPasswordRequest: React.FC = () => {
           });
         });
       } else if (axios.isAxiosError(error)) {
-        setModalMessage(
+        setAlertMessage(
           "Failed to send OTP. Please check the email and try again."
         );
-        setShowModal(true);
+        setAlertVariant("danger");
       } else {
         console.error("Unexpected error:", error);
       }
@@ -69,50 +72,49 @@ const ForgotPasswordRequest: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow-sm">
-            <div className="card-body">
-              <h2 className="card-title text-center">Forgot Password</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email")}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
-                  </div>
-                </div>
+    <div className="vh-100 background">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 mt-5">
+            <div className="card mt-5">
+              <div className="card-body">
+                <h2 className="card-title text-center">Forgot Password</h2>
 
-                <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Send OTP
-                  </button>
-                </div>
-              </form>
+                {/* Alert for success or error */}
+                {alertMessage && (
+                  <div className={`alert alert-${alertVariant}`} role="alert">
+                    {alertMessage}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  <div className="d-grid">
+                    <button type="submit" className="btn btn-primary">
+                      Send OTP
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Modal for feedback messages */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Notification</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{modalMessage}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

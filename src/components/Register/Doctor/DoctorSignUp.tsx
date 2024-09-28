@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Button } from "react-bootstrap";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z
@@ -40,8 +40,7 @@ const DoctorSignUp: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false); // Loading state for the API call
-  const [modalMessage, setModalMessage] = useState(""); // State for modal message
-  const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [formError, setFormError] = useState(""); // State to hold error message from API
   const navigate = useNavigate();
 
   const {
@@ -50,13 +49,6 @@ const DoctorSignUp: React.FC = () => {
     formState: { errors },
     setError,
   } = useForm<SchemaType>();
-
-  const handleModalClose = () => {
-    setShowModal(false);
-    if (modalMessage.includes("successfully")) {
-      navigate("/doctor-reg-otp"); // Navigate to OTP verification page on success
-    }
-  };
 
   const validateForm = (data: SchemaType) => {
     const result = schema.safeParse(data);
@@ -73,6 +65,9 @@ const DoctorSignUp: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
+    // Clear any previous form error
+    setFormError("");
+
     // Manual validation
     if (!validateForm(data)) {
       return;
@@ -94,167 +89,164 @@ const DoctorSignUp: React.FC = () => {
 
       // Check if the registration was successful
       if (response.data.status === "success") {
-        setModalMessage(
-          "Registration successful! Please check your email for OTP verification."
-        );
-        setShowModal(true); // Show modal with success message
         navigate("/doctor-reg-otp");
       } else {
-        setModalMessage("Registration failed. Please try again.");
-        setShowModal(true); // Show modal with failure message
+        setFormError("Registration failed. Please try again.");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error("Error response:", error.response?.data);
-        setModalMessage(
+        setFormError(
           error.response?.data?.message ||
             "Registration failed. Please try again."
         );
       } else {
         console.error("Error:", error);
-        setModalMessage("An unexpected error occurred. Please try again.");
+        setFormError("An unexpected error occurred. Please try again.");
       }
-      setShowModal(true); // Show modal with error message
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Doctor Sign Up</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Name Input */}
-                <div className="mb-3">
-                  <label className="form-label">Name</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.name ? "is-invalid" : ""
-                    }`}
-                    {...register("name", { required: "Name is required" })}
-                  />
-                  <div className="invalid-feedback">{errors.name?.message}</div>
-                </div>
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center">Doctor SignUp</h2>
 
-                {/* Email Input */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", { required: "Email is required" })}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+                {/* Form-level error message */}
+                {formError && (
+                  <div className="alert alert-danger" role="alert">
+                    {formError}
                   </div>
-                </div>
+                )}
 
-                {/* SSN Input */}
-                <div className="mb-3">
-                  <label className="form-label">SSN</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.SSN ? "is-invalid" : ""}`}
-                    {...register("SSN", { required: "SSN is required" })}
-                  />
-                  <div className="invalid-feedback">{errors.SSN?.message}</div>
-                </div>
-
-                {/* Password Input */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Name Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Name</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="text"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.name ? "is-invalid" : ""
                       }`}
-                      {...register("password", {
-                        required: "Password is required",
-                      })}
+                      {...register("name", { required: "Name is required" })}
                     />
+                    <div className="invalid-feedback">
+                      {errors.name?.message}
+                    </div>
+                  </div>
+
+                  {/* Email Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", { required: "Email is required" })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  {/* SSN Input */}
+                  <div className="mb-3">
+                    <label className="form-label">National ID</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.SSN ? "is-invalid" : ""
+                      }`}
+                      {...register("SSN", { required: "ID is required" })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.SSN?.message}
+                    </div>
+                  </div>
+
+                  {/* Password Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  {/* Confirm Password Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Confirm Password</label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        {...register("confirmPassword", {
+                          required: "Confirm password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }>
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.confirmPassword?.message}
+                    </div>
+                  </div>
+
+                  {/* Sign Up Button */}
+                  <div className="d-grid mb-3">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
-                  </div>
-                </div>
+                </form>
 
-                {/* Confirm Password Input */}
-                <div className="mb-3">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-group">
-                    <input
-                      type={confirmPasswordVisible ? "text" : "password"}
-                      className={`form-control ${
-                        errors.confirmPassword ? "is-invalid" : ""
-                      }`}
-                      {...register("confirmPassword", {
-                        required: "Confirm password is required",
-                      })}
-                    />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }>
-                      {confirmPasswordVisible ? "Hide" : "Show"}
-                    </button>
-                  </div>
-                  <div className="invalid-feedback">
-                    {errors.confirmPassword?.message}
-                  </div>
-                </div>
-
-                {/* Sign Up Button */}
-                <div className="d-grid mb-3">
+                <div className="text-center">
                   <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Signing Up..." : "Sign Up"}
+                    type="button"
+                    className="btn btn-link"
+                    onClick={() => navigate("/doctor-signin")}>
+                    Already have an account?
                   </button>
                 </div>
-              </form>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  className="btn btn-link"
-                  onClick={() => navigate("/doctor-signin")}>
-                  Already have an account?
-                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Bootstrap Modal */}
-      <Modal show={showModal} onHide={handleModalClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Doctor Sign Up</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{modalMessage}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleModalClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   );
 };

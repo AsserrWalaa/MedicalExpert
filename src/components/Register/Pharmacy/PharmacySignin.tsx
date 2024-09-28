@@ -11,14 +11,7 @@ const schema = z.object({
     .string()
     .email("Please enter a valid email")
     .nonempty("Email is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-    .regex(/[a-z]/, "Password must have at least one lowercase letter")
-    .regex(/\d/, "Password must have at least one number")
-    .regex(/[@$!%*?&#]/, "Password must have at least one special character")
-    .nonempty("Password is required"),
+  password: z.string().nonempty("Password is required"),
 });
 
 // Type inferred from the schema
@@ -28,6 +21,7 @@ const PharmacySignIn: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
   const {
@@ -37,119 +31,132 @@ const PharmacySignIn: React.FC = () => {
   } = useForm<SchemaType>();
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
+    setLoading(true); // Set loading to true when submission starts
     try {
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/pharmacy/login", // Replace with your API endpoint
         data
       );
 
-      // Debugging: Log the response data to inspect its structure
       console.log("API Response:", response.data);
 
       if (response.data.status === "success") {
-        // Save the token and other user data if needed
         localStorage.setItem("token", response.data.token);
         setSuccessMessage(response.data.message || "Login successful.");
-        setErrorMessage(null); // Clear error message
-        navigate("/home"); // Navigate to the home page
+        setErrorMessage(null);
+        navigate("/home");
       } else {
         setErrorMessage(response.data.message || "Invalid email or password.");
-        setSuccessMessage(null); // Clear success message
+        setSuccessMessage(null);
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        // Log the error details for debugging
         console.error("API Error:", error.response);
-        setErrorMessage("Email or password is not correct.");
-        setSuccessMessage(null); // Clear success message
+        setErrorMessage(
+          error.response.data.message || "Email or password is not correct."
+        );
+        setSuccessMessage(null);
       } else {
         setErrorMessage("An unexpected error occurred. Please try again.");
-        setSuccessMessage(null); // Clear success message
+        setSuccessMessage(null);
       }
+    } finally {
+      setLoading(false); // Reset loading state
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Pharmacy Sign In</h2>
-              {errorMessage && (
-                <div className="alert alert-danger">{errorMessage}</div>
-              )}
-              {successMessage && (
-                <div className="alert alert-success">{successMessage}</div>
-              )}
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", { required: "Email is required" })}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center">Pharmacy Sign In</h2>
+                {errorMessage && (
+                  <div className="alert alert-danger" role="alert">
+                    {errorMessage}
                   </div>
-                </div>
-
-                {/* Password */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+                )}
+                {successMessage && (
+                  <div className="alert alert-success" role="alert">
+                    {successMessage}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="email"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("password", {
-                        required: "Password is required",
+                      {...register("email", {
+                        required: "Email is required",
                       })}
                     />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  {/* Sign In Button */}
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing In..." : "Sign In"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
+
+                  {/* Forgot Password */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/pharmacy-forgot")}>
+                      Forgot Password?
+                    </button>
                   </div>
-                </div>
 
-                {/* Sign In Button */}
-                <div className="d-grid">
-                  <button type="submit" className="btn btn-primary">
-                    Sign In
-                  </button>
-                </div>
-
-                {/* Forgot Password */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/pharmacy-forgot")}>
-                    Forgot Password?
-                  </button>
-                </div>
-
-                {/* Don't have an account */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/pharmacy-signup")}>
-                    Don't have an account? Sign Up
-                  </button>
-                </div>
-              </form>
+                  {/* Don't have an account */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/pharmacy-signup")}>
+                      Don't have an account? Sign Up
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

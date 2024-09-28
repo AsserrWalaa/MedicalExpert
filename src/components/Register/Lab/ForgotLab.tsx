@@ -69,54 +69,57 @@ const LaboratoryForgotPasswordEmail: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Forgot Password</h2>
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", { required: true })}
-                    required
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+    <div className="vh-100 backgound">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4">
+              <div className="card-body">
+                <h2 className="card-title text-center">Forgot Password</h2>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
                   </div>
-                </div>
 
-                {/* Success Message */}
-                {successMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {successMessage}
+                  {/* Success Message */}
+                  {successMessage && (
+                    <div className="alert alert-success" role="alert">
+                      {successMessage}
+                    </div>
+                  )}
+
+                  {/* Error Message */}
+                  {errorMessage && (
+                    <div className="alert alert-danger" role="alert">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="d-grid">
+                    <button
+                      type="submit"
+                      className="btn btn-primary mb-3"
+                      disabled={isLoading} // Disable button during loading
+                    >
+                      {isLoading ? "Sending..." : "Send OTP"}
+                    </button>
                   </div>
-                )}
-
-                {/* Error Message */}
-                {errorMessage && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}
-
-                {/* Submit Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary mb-3"
-                    disabled={isLoading} // Disable button during loading
-                  >
-                    {isLoading ? "Sending..." : "Send OTP"}
-                  </button>
-                </div>
-              </form>
+                </form>
+              </div>
             </div>
           </div>
         </div>

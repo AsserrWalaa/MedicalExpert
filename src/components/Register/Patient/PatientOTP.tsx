@@ -106,7 +106,9 @@ const PatientOTPVerification: React.FC = () => {
                     className={`form-control ${
                       errors.email ? "is-invalid" : ""
                     }`}
-                    {...register("email")}
+                    {...register("email", {
+                      required: "Email is required",
+                    })}
                   />
                   {errors.email && (
                     <p className="text-danger mt-2">{errors.email.message}</p>
@@ -119,7 +121,9 @@ const PatientOTPVerification: React.FC = () => {
                   <input
                     type="text"
                     className={`form-control ${errors.otp ? "is-invalid" : ""}`}
-                    {...register("otp")}
+                    {...register("otp", {
+                      required: "OTP is required",
+                    })}
                     maxLength={6}
                     minLength={6}
                   />
@@ -136,7 +140,9 @@ const PatientOTPVerification: React.FC = () => {
                     className={`form-control ${
                       errors.password ? "is-invalid" : ""
                     }`}
-                    {...register("password")}
+                    {...register("password", {
+                      required: "Password is required",
+                    })}
                     minLength={8}
                   />
                   {errors.password && (
@@ -154,7 +160,9 @@ const PatientOTPVerification: React.FC = () => {
                     className={`form-control ${
                       errors.confirmPassword ? "is-invalid" : ""
                     }`}
-                    {...register("confirmPassword")}
+                    {...register("confirmPassword", {
+                      required: "Confirm password",
+                    })}
                     minLength={8}
                   />
                   {errors.confirmPassword && (
