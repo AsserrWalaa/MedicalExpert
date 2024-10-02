@@ -5,6 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../index.css";
+import logo from "../../../assets/imgs/new logo.webp";
 
 // Zod schema for form validation
 const schema = z.object({
@@ -118,6 +119,14 @@ const DoctorReset: React.FC = () => {
               <div className="card-body ">
                 <h2 className="card-title text-center">Reset Password</h2>
 
+                {/* Adjust logo size here */}
+                <img
+                  src={logo}
+                  className="d-block my-3 mx-auto"
+                  alt="Hero"
+                  height={180}
+                  width={200}
+                />
                 {/* Success Alert */}
                 {successMessage && (
                   <div className="alert alert-success text-center" role="alert">

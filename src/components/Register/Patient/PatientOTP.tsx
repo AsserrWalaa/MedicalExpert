@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import logo from "../../../assets/imgs/new logo.webp";
 
 // Define form input types
 type FormData = {
@@ -98,6 +99,14 @@ const PatientOTPVerification: React.FC = () => {
             <div className="card mt-4 user-form ">
               <div className="card-body ">
                 <h2 className="card-title text-center">Verify OTP</h2>
+                {/* Adjust logo size here */}
+                <img
+                  src={logo}
+                  className="d-block my-3 mx-auto"
+                  alt="Hero"
+                  height={180}
+                  width={200}
+                />
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* Email Input */}
                   <div className="mb-3">

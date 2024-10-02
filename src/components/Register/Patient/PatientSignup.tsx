@@ -4,6 +4,8 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import logo from "../../../assets/imgs/new logo.webp";
+
 import "../../index.css";
 // Define the validation schema using Zod
 const schema = z.object({
@@ -108,7 +110,14 @@ const PatientSignUp: React.FC = () => {
             <div className="card mt-4 user-form ">
               <div className="card-body ">
                 <h2 className="card-title text-center">Patient SignUp</h2>
-
+                {/* Adjust logo size here */}
+                <img
+                  src={logo}
+                  className="d-block my-3 mx-auto"
+                  alt="Hero"
+                  height={180}
+                  width={200}
+                />
                 {/* Alert Message */}
                 {message && (
                   <div

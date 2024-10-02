@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../index.css";
+import logo from "../../../assets/imgs/new logo.webp";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -83,6 +84,14 @@ const ForgotPasswordRequest: React.FC = () => {
               <div className="card-body ">
                 <h2 className="card-title text-center">Forgot Password</h2>
 
+                {/* Adjust logo size here */}
+                <img
+                  src={logo}
+                  className="d-block my-3 mx-auto"
+                  alt="Hero"
+                  height={180}
+                  width={200}
+                />
                 {/* Display Success/Error message */}
                 {message && (
                   <div
