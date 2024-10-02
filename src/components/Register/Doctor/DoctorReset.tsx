@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../../index.css";
 
 // Zod schema for form validation
 const schema = z.object({
-  email: z.string().email("Invalid email format").nonempty("Email is required"),
-  otp: z.string().nonempty("OTP is required"),
+  otp: z
+    .string()
+    .length(6, "OTP must be 6 digits")
+    .regex(/^\d{6}$/, "OTP must be numeric"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -31,12 +33,41 @@ const DoctorReset: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const email = location.state?.email; // Access email from location state
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<SchemaType>();
+
+  // State for individual OTP inputs
+  const [otp, setOtp] = useState(Array(6).fill(""));
+
+  const handleOtpChange = (index: number, value: string) => {
+    // Update OTP value in the array
+    const newOtp = [...otp];
+    newOtp[index] = value;
+
+    // Move to the next input field if length is 1
+    if (value.length === 1 && index < 5) {
+      const nextInput = document.getElementById(`otp-${index + 1}`);
+      nextInput?.focus();
+    }
+
+    // Move to the previous input field if backspacing
+    if (value.length === 0 && index > 0) {
+      const prevInput = document.getElementById(`otp-${index - 1}`);
+      prevInput?.focus();
+    }
+
+    setOtp(newOtp);
+    // Update form value for validation
+    setValue("otp", newOtp.join(""));
+  };
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
     if (data.password !== data.confirmPassword) {
@@ -47,7 +78,7 @@ const DoctorReset: React.FC = () => {
     setLoading(true);
 
     const apiData = {
-      email: data.email,
+      email: email, // Use the email from route state
       otp: data.otp,
       password: data.password,
     };
@@ -102,33 +133,30 @@ const DoctorReset: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input
-                      type="email"
-                      className={`form-control ${
-                        errors.email ? "is-invalid" : ""
-                      }`}
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
-                    />
-                    <div className="invalid-feedback">
-                      {errors.email?.message}
-                    </div>
-                  </div>
-
+                  {/* Hidden Email Input */}
+                  <input type="hidden" value={email} />
                   <div className="mb-3">
                     <label className="form-label">OTP</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.otp ? "is-invalid" : ""
-                      }`}
-                      {...register("otp", {
-                        required: "Otp is required",
-                      })}
-                    />
+                    <div className="d-flex justify-content-between">
+                      {otp.map((digit, index) => (
+                        <input
+                          key={index}
+                          id={`otp-${index}`}
+                          type="text"
+                          maxLength={1}
+                          className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
+                            errors.otp ? "is-invalid" : ""
+                          }`}
+                          value={digit}
+                          onChange={(e) =>
+                            handleOtpChange(
+                              index,
+                              e.target.value.replace(/\D/g, "")
+                            )
+                          }
+                        />
+                      ))}
+                    </div>
                     <div className="invalid-feedback">
                       {errors.otp?.message}
                     </div>
@@ -143,18 +171,20 @@ const DoctorReset: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: " password is required",
+                          required: "Password is required",
                         })}
                       />
                       <button
                         type="button"
                         className="btn btn-outline-secondary"
-                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        onClick={() =>
+                          setPasswordVisible((prevState) => !prevState)
+                        }>
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
-                    </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
+                      <div className="invalid-feedback">
+                        {errors.password?.message}
+                      </div>
                     </div>
                   </div>
 
@@ -164,7 +194,9 @@ const DoctorReset: React.FC = () => {
                       <input
                         type={confirmPasswordVisible ? "text" : "password"}
                         className={`form-control ${
-                          errors.confirmPassword ? "is-invalid" : ""
+                          !passwordsMatch || errors.confirmPassword
+                            ? "is-invalid"
+                            : ""
                         }`}
                         {...register("confirmPassword", {
                           required: "Confirm password is required",
@@ -174,17 +206,15 @@ const DoctorReset: React.FC = () => {
                         type="button"
                         className="btn btn-outline-secondary"
                         onClick={() =>
-                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                          setConfirmPasswordVisible((prevState) => !prevState)
                         }>
                         {confirmPasswordVisible ? "Hide" : "Show"}
                       </button>
+                      <div className="invalid-feedback">
+                        {errors.confirmPassword?.message}
+                        {!passwordsMatch && <div>Passwords do not match.</div>}
+                      </div>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.confirmPassword?.message}
-                    </div>
-                    {!passwordsMatch && (
-                      <div className="text-danger">Passwords must match</div>
-                    )}
                   </div>
 
                   <div className="d-grid">

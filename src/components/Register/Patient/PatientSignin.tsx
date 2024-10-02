@@ -75,101 +75,104 @@ const PatientSignIn: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Patient Sign In</h2>
-              {errorMessage && (
-                <div
-                  className="alert alert-danger"
-                  role="alert"
-                  aria-live="assertive">
-                  {errorMessage}
-                </div>
-              )}
-              {successMessage && (
-                <div
-                  className="alert alert-success"
-                  role="alert"
-                  aria-live="assertive">
-                  {successMessage}
-                </div>
-              )}
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", {
-                      required: "Email is required",
-                    })}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
-                  </div>
-                </div>
+    <div className="vh-100 user-backgrond">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4 user-form ">
+              <div className="card-body ">
+                <h2 className="card-title text-center">Patient SignUp</h2>
 
-                {/* Password */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+                {errorMessage && (
+                  <div
+                    className="alert alert-danger"
+                    role="alert"
+                    aria-live="assertive">
+                    {errorMessage}
+                  </div>
+                )}
+                {successMessage && (
+                  <div
+                    className="alert alert-success"
+                    role="alert"
+                    aria-live="assertive">
+                    {successMessage}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="text"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("password", {
-                        required: "Password is required",
+                      {...register("email", {
+                        required: "Email is required",
                       })}
                     />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  {/* Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    <div className="invalid-feedback">
+                      {errors.password?.message}
+                    </div>
+                  </div>
+
+                  {/* Sign In Button */}
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing In..." : "Sign In"}
                     </button>
                   </div>
-                  <div className="invalid-feedback">
-                    {errors.password?.message}
+
+                  {/* Forgot Password */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/patient-forgot")}>
+                      Forgot Password?
+                    </button>
                   </div>
-                </div>
 
-                {/* Sign In Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Signing In..." : "Sign In"}
-                  </button>
-                </div>
-
-                {/* Forgot Password */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/patient-forgot")}>
-                    Forgot Password?
-                  </button>
-                </div>
-
-                {/* Don't have an account */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/patient-signup")}>
-                    Don't have an account? Sign Up
-                  </button>
-                </div>
-              </form>
+                  {/* Don't have an account */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/patient-signup")}>
+                      Don't have an account? Sign Up
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

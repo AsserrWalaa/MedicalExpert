@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -16,63 +17,65 @@ const schema = z.object({
 type SchemaType = z.infer<typeof schema>;
 
 const ForgotPasswordRequest: React.FC = () => {
-  const navigate = useNavigate();
-  const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const [alertVariant, setAlertVariant] = useState<"success" | "danger">(
-    "success"
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null
   );
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     setError,
-  } = useForm<SchemaType>();
+  } = useForm<SchemaType>({
+    mode: "onBlur",
+  });
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
-    try {
-      // Perform manual validation with Zod schema
-      schema.parse(data);
+    setLoading(true);
+    setMessage(null);
 
-      // Make API call to send OTP
-      const response = await axios.post(
-        "https://admin.medicalexpertise.net/api/admin/password/forgot",
-        { email: data.email }
-      );
-
-      if (response.status === 200) {
-        setAlertMessage(`OTP sent successfully to: ${data.email}`);
-        setAlertVariant("success");
-
-        // Navigate to OTP page after a delay
-        setTimeout(() => {
-          navigate("/admin-otp");
-        }, 2000);
-      } else {
-        setAlertMessage("Failed to send OTP. Please try again.");
-        setAlertVariant("danger");
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        error.errors.forEach((err) => {
-          setError(err.path[0] as keyof SchemaType, {
-            type: "manual",
-            message: err.message,
-          });
-        });
-      } else if (axios.isAxiosError(error)) {
-        setAlertMessage(
-          "Failed to send OTP. Please check the email and try again."
+    if (!otpSent) {
+      // Send OTP logic
+      try {
+        const response = await axios.post(
+          "https://admin.medicalexpertise.net/api/admin/password/forgot",
+          { email: data.email }
         );
-        setAlertVariant("danger");
-      } else {
-        console.error("Unexpected error:", error);
+        console.log("OTP sent successfully:", response.data);
+        setOtpSent(true);
+        setMessage("OTP sent successfully! Please check your email.");
+        setMessageType("success");
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        if (axios.isAxiosError(error)) {
+          const errorMsg =
+            error.response?.data?.message ||
+            "Failed to send OTP. Please try again.";
+          setError("email", { type: "manual", message: errorMsg });
+          setMessage(errorMsg);
+          setMessageType("error");
+        }
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // After OTP is sent, navigate to DoctorReset page with email passed as state
+      try {
+        navigate("/admin-reset", { state: { email: data.email } });
+      } catch (error) {
+        console.error("Error navigating to reset password:", error);
+      } finally {
+        setLoading(false);
       }
     }
   };
 
   return (
-    <div className="vh-100 background">
+    <div className="vh-100 backgound">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6 mt-5">
@@ -80,10 +83,16 @@ const ForgotPasswordRequest: React.FC = () => {
               <div className="card-body">
                 <h2 className="card-title text-center">Forgot Password</h2>
 
-                {/* Alert for success or error */}
-                {alertMessage && (
-                  <div className={`alert alert-${alertVariant}`} role="alert">
-                    {alertMessage}
+                {/* Display Success/Error message */}
+                {message && (
+                  <div
+                    className={`alert ${
+                      messageType === "success"
+                        ? "alert-success"
+                        : "alert-danger"
+                    }`}
+                    role="alert">
+                    {message}
                   </div>
                 )}
 
@@ -95,9 +104,8 @@ const ForgotPasswordRequest: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
+                      {...register("email", { required: "Email is required" })}
+                      readOnly={otpSent}
                     />
                     <div className="invalid-feedback">
                       {errors.email?.message}
@@ -105,8 +113,17 @@ const ForgotPasswordRequest: React.FC = () => {
                   </div>
 
                   <div className="d-grid">
-                    <button type="submit" className="btn btn-primary">
-                      Send OTP
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading
+                        ? otpSent
+                          ? "Verifying OTP..."
+                          : "Sending OTP..."
+                        : otpSent
+                        ? "Verify OTP"
+                        : "Send OTP"}
                     </button>
                   </div>
                 </form>

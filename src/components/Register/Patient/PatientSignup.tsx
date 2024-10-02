@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-
+import "../../index.css";
 // Define the validation schema using Zod
 const schema = z.object({
   patientName: z
@@ -101,148 +101,154 @@ const PatientSignUp: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Patient SignUp</h2>
+    <div className="vh-100 user-backgrond">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4 user-form ">
+              <div className="card-body ">
+                <h2 className="card-title text-center">Patient SignUp</h2>
 
-              {/* Alert Message */}
-              {message && (
-                <div
-                  className={`alert ${
-                    isSuccess ? "alert-success" : "alert-danger"
-                  }`}
-                  role="alert">
-                  {message}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Patient Name */}
-                <div className="mb-3">
-                  <label className="form-label">Patient Name</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.patientName ? "is-invalid" : ""
+                {/* Alert Message */}
+                {message && (
+                  <div
+                    className={`alert ${
+                      isSuccess ? "alert-success" : "alert-danger"
                     }`}
-                    {...register("patientName", {
-                      required: "Name is required",
-                    })}
-                  />
-                  {errors.patientName && (
-                    <p className="text-danger">{errors.patientName.message}</p>
-                  )}
-                </div>
+                    role="alert">
+                    {message}
+                  </div>
+                )}
 
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", {
-                      required: "Email is required",
-                    })}
-                  />
-                  {errors.email && (
-                    <p className="text-danger">{errors.email.message}</p>
-                  )}
-                </div>
-
-                {/* Patient ID */}
-                <div className="mb-3">
-                  <label className="form-label">Patient ID</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.SSN ? "is-invalid" : ""}`}
-                    {...register("SSN", {
-                      required: "ID is required",
-                    })}
-                  />
-                  {errors.SSN && (
-                    <p className="text-danger">{errors.SSN.message}</p>
-                  )}
-                </div>
-
-                {/* Password */}
-                <div className="mb-3">
-                  <label className="form-label">Password</label>
-                  <div className="input-group">
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Patient Name */}
+                  <div className="mb-3">
+                    <label className="form-label">Patient Name</label>
                     <input
-                      type={passwordVisible ? "text" : "password"}
+                      type="text"
                       className={`form-control ${
-                        errors.password ? "is-invalid" : ""
+                        errors.patientName ? "is-invalid" : ""
                       }`}
-                      {...register("password", {
-                        required: "Password is required",
+                      {...register("patientName", {
+                        required: "Name is required",
                       })}
                     />
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setPasswordVisible(!passwordVisible)}>
-                      {passwordVisible ? "Hide" : "Show"}
-                    </button>
+                    {errors.patientName && (
+                      <p className="text-danger">
+                        {errors.patientName.message}
+                      </p>
+                    )}
                   </div>
-                  {errors.password && (
-                    <p className="text-danger">{errors.password.message}</p>
-                  )}
-                </div>
 
-                {/* Confirm Password */}
-                <div className="mb-3">
-                  <label className="form-label">Confirm Password</label>
-                  <div className="input-group">
+                  {/* Email */}
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
                     <input
-                      type={confirmPasswordVisible ? "text" : "password"}
+                      type="email"
                       className={`form-control ${
-                        errors.confirmPassword ? "is-invalid" : ""
+                        errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("confirmPassword", {
-                        required: "Confirm password",
+                      {...register("email", {
+                        required: "Email is required",
                       })}
                     />
+                    {errors.email && (
+                      <p className="text-danger">{errors.email.message}</p>
+                    )}
+                  </div>
+
+                  {/* Patient ID */}
+                  <div className="mb-3">
+                    <label className="form-label">Patient ID</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.SSN ? "is-invalid" : ""
+                      }`}
+                      {...register("SSN", {
+                        required: "ID is required",
+                      })}
+                    />
+                    {errors.SSN && (
+                      <p className="text-danger">{errors.SSN.message}</p>
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Password</label>
+                    <div className="input-group">
+                      <input
+                        type={passwordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.password ? "is-invalid" : ""
+                        }`}
+                        {...register("password", {
+                          required: "Password is required",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() => setPasswordVisible(!passwordVisible)}>
+                        {passwordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div className="mb-3">
+                    <label className="form-label">Confirm Password</label>
+                    <div className="input-group">
+                      <input
+                        type={confirmPasswordVisible ? "text" : "password"}
+                        className={`form-control ${
+                          errors.confirmPassword ? "is-invalid" : ""
+                        }`}
+                        {...register("confirmPassword", {
+                          required: "Confirm password",
+                        })}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={() =>
+                          setConfirmPasswordVisible(!confirmPasswordVisible)
+                        }>
+                        {confirmPasswordVisible ? "Hide" : "Show"}
+                      </button>
+                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-danger">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Sign Up Button */}
+                  <div className="d-grid">
                     <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() =>
-                        setConfirmPasswordVisible(!confirmPasswordVisible)
-                      }>
-                      {confirmPasswordVisible ? "Hide" : "Show"}
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-danger">
-                      {errors.confirmPassword.message}
-                    </p>
-                  )}
-                </div>
 
-                {/* Sign Up Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Signing Up..." : "Sign Up"}
-                  </button>
-                </div>
-
-                {/* Already have an account */}
-                <div className="text-center mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-link"
-                    onClick={() => navigate("/patient-signin")}>
-                    Already have an account? Sign In
-                  </button>
-                </div>
-              </form>
+                  {/* Already have an account */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/patient-signin")}>
+                      Already have an account? Sign In
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>

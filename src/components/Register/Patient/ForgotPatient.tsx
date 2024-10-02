@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
-import "bootstrap/dist/css/bootstrap.min.css";
 import axios from "axios";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -13,112 +14,120 @@ const schema = z.object({
     .nonempty("Email is required"),
 });
 
-// Type inferred from the schema
 type SchemaType = z.infer<typeof schema>;
 
-const PatientForgotPasswordEmail: React.FC = () => {
-  const navigate = useNavigate(); // Initialize useNavigate hook
-  const [isLoading, setIsLoading] = useState(false); // State for loading indicator
-  const [errorMessage, setErrorMessage] = useState<string | null>(null); // Error message state
-  const [successMessage, setSuccessMessage] = useState<string | null>(null); // Success message state
+const ForgotPasswordRequest: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(
+    null
+  );
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SchemaType>();
+    setError,
+  } = useForm<SchemaType>({
+    mode: "onBlur",
+  });
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
-    setIsLoading(true); // Set loading state to true
-    setErrorMessage(null); // Reset error message on each submit
-    setSuccessMessage(null); // Reset success message on each submit
+    setLoading(true);
+    setMessage(null);
 
-    try {
-      const response = await axios.post(
-        "https://admin.medicalexpertise.net/api/patient/password/forgot", // Replace with your API endpoint
-        { email: data.email }
-      );
-
-      // Check the response for success condition
-      if (response.data) {
-        // Display success message and navigate on success
-        setSuccessMessage("OTP has been sent to your email.");
-        navigate("/patient-forgot-otp"); // Redirect after success
-      } else {
-        // Display error message if the email is invalid or OTP not sent
-        setErrorMessage(
-          response.data.message ||
-            "Failed to send OTP. Please check your email."
+    if (!otpSent) {
+      // Send OTP logic
+      try {
+        const response = await axios.post(
+          "https://admin.medicalexpertise.net/api/patient/password/forgot",
+          { email: data.email }
         );
+        console.log("OTP sent successfully:", response.data);
+        setOtpSent(true);
+        setMessage("OTP sent successfully! Please check your email.");
+        setMessageType("success");
+      } catch (error) {
+        console.error("Error sending OTP:", error);
+        if (axios.isAxiosError(error)) {
+          const errorMsg =
+            error.response?.data?.message ||
+            "Failed to send OTP. Please try again.";
+          setError("email", { type: "manual", message: errorMsg });
+          setMessage(errorMsg);
+          setMessageType("error");
+        }
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error("Unexpected error:", error);
-      // Handle and display API errors
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage("An error occurred. Please try again later.");
+    } else {
+      // After OTP is sent, navigate to DoctorReset page with email passed as state
+      try {
+        navigate("/patient-reset", { state: { email: data.email } });
+      } catch (error) {
+        console.error("Error navigating to reset password:", error);
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setIsLoading(false); // Set loading state to false after request completion
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Forgot Password</h2>
+    <div className="vh-100 user-backgrond">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4 user-form ">
+              <div className="card-body ">
+                <h2 className="card-title text-center">Forgot Password</h2>
 
-              {/* Success Message */}
-              {successMessage && (
-                <div className="alert alert-success" role="alert">
-                  {successMessage}
-                </div>
-              )}
-
-              {/* Error Message */}
-              {errorMessage && (
-                <div className="alert alert-danger" role="alert">
-                  {errorMessage}
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email */}
-                <div className="mb-3">
-                  <label className="form-label">Email</label>
-                  <input
-                    type="email"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
+                {/* Display Success/Error message */}
+                {message && (
+                  <div
+                    className={`alert ${
+                      messageType === "success"
+                        ? "alert-success"
+                        : "alert-danger"
                     }`}
-                    {...register("email", {
-                      required: "Email is required",
-                    })}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+                    role="alert">
+                    {message}
                   </div>
-                </div>
+                )}
 
-                {/* Submit Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary mb-3"
-                    disabled={isLoading} // Disable button during loading
-                  >
-                    {isLoading ? "Sending..." : "Send OTP"}
-                  </button>
-                </div>
-              </form>
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  <div className="mb-3">
+                    <label className="form-label">Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", { required: "Email is required" })}
+                      readOnly={otpSent}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
+
+                  <div className="d-grid">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading
+                        ? otpSent
+                          ? "Verifying OTP..."
+                          : "Sending OTP..."
+                        : otpSent
+                        ? "Verify OTP"
+                        : "Send OTP"}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -127,4 +136,4 @@ const PatientForgotPasswordEmail: React.FC = () => {
   );
 };
 
-export default PatientForgotPasswordEmail;
+export default ForgotPasswordRequest;

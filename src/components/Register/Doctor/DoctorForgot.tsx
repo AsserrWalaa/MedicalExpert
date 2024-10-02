@@ -63,33 +63,16 @@ const ForgotPasswordRequest: React.FC = () => {
         setLoading(false);
       }
     } else {
-      // Verify OTP logic
+      // After OTP is sent, navigate to DoctorReset page with email passed as state
       try {
-        const response = await axios.post(
-          "https://admin.medicalexpertise.net/api/doctor/password/forgot",
-          { email: data.email }
-        );
-        console.log("OTP verified successfully:", response.data);
-        setMessage("OTP verified! Redirecting to reset password...");
-        setMessageType("success");
-        setTimeout(() => {
-          navigate("/doctor-reset");
-        }, 3000); // Redirect after 3 seconds
+        navigate("/doctor-reset", { state: { email: data.email } });
       } catch (error) {
-        console.error("Error verifying OTP:", error);
-        if (axios.isAxiosError(error)) {
-          const errorMsg =
-            error.response?.data?.message || "Invalid OTP. Please try again.";
-          setMessage(errorMsg);
-          setMessageType("error");
-        }
+        console.error("Error navigating to reset password:", error);
       } finally {
         setLoading(false);
       }
     }
   };
-
-  // Timer for resend OTP
 
   return (
     <div className="vh-100 backgound">

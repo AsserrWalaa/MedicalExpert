@@ -65,69 +65,81 @@ const PatientOTPVerification: React.FC = () => {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="card-title text-center">Verify OTP</h2>
-              {errorMessage && (
-                <div className="alert alert-danger" role="alert">
-                  {errorMessage}
-                </div>
-              )}
-              {successMessage && (
-                <div className="alert alert-success" role="alert">
-                  {successMessage}
-                </div>
-              )}
-              <form onSubmit={handleSubmit(onSubmit)}>
-                {/* Email Input */}
-                <div className="mb-3">
-                  <label className="form-label">Email Address</label>
-                  <input
-                    type="text"
-                    className={`form-control ${
-                      errors.email ? "is-invalid" : ""
-                    }`}
-                    {...register("email", {
-                      required: "Email is required",
-                      pattern: {
-                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Invalid email address",
-                      },
-                    })}
-                  />
-                  <div className="invalid-feedback">
-                    {errors.email?.message}
+    <div className="vh-100 user-backgrond">
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="card mt-4 user-form ">
+              <div className="card-body ">
+                <h2 className="card-title text-center">Verify OTP</h2>
+                {errorMessage && (
+                  <div className="alert alert-danger" role="alert">
+                    {errorMessage}
                   </div>
-                </div>
+                )}
+                {successMessage && (
+                  <div className="alert alert-success" role="alert">
+                    {successMessage}
+                  </div>
+                )}
+                <form onSubmit={handleSubmit(onSubmit)}>
+                  {/* Email Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Email Address</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.email ? "is-invalid" : ""
+                      }`}
+                      {...register("email", {
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: "Invalid email address",
+                        },
+                      })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.email?.message}
+                    </div>
+                  </div>
 
-                {/* OTP Input */}
-                <div className="mb-3">
-                  <label className="form-label">Enter OTP</label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.otp ? "is-invalid" : ""}`}
-                    {...register("otp", {
-                      required: "OTP is required",
-                      minLength: { value: 6, message: "OTP must be 6 digits" },
-                      maxLength: { value: 6, message: "OTP must be 6 digits" },
-                    })}
-                  />
-                  <div className="invalid-feedback">{errors.otp?.message}</div>
-                </div>
+                  {/* OTP Input */}
+                  <div className="mb-3">
+                    <label className="form-label">Enter OTP</label>
+                    <input
+                      type="text"
+                      className={`form-control ${
+                        errors.otp ? "is-invalid" : ""
+                      }`}
+                      {...register("otp", {
+                        required: "OTP is required",
+                        minLength: {
+                          value: 6,
+                          message: "OTP must be 6 digits",
+                        },
+                        maxLength: {
+                          value: 6,
+                          message: "OTP must be 6 digits",
+                        },
+                      })}
+                    />
+                    <div className="invalid-feedback">
+                      {errors.otp?.message}
+                    </div>
+                  </div>
 
-                {/* Submit Button */}
-                <div className="d-grid">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={loading}>
-                    {loading ? "Verifying..." : "Verify OTP"}
-                  </button>
-                </div>
-              </form>
+                  {/* Submit Button */}
+                  <div className="d-grid">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={loading}>
+                      {loading ? "Verifying..." : "Verify OTP"}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
