@@ -82,7 +82,7 @@ const PharmacySignUp: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 backgound">
+    <div className="h-100 backgound">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">

@@ -104,7 +104,7 @@ const PatientSignUp: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 user-backgrond">
+    <div className="h-100 user-backgrond">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">

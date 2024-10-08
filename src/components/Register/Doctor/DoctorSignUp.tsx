@@ -106,7 +106,7 @@ const DoctorSignUp: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 backgound">
+    <div className=" h-100 backgound">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">
@@ -130,7 +130,9 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.name ? "is-invalid" : ""
                       }`}
-                      {...register("name")}
+                      {...register("name", {
+                        required: "Name is required",
+                      })}
                     />
                     <div className="invalid-feedback">
                       {errors.name?.message}
@@ -144,7 +146,9 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email")}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
                     />
                     <div className="invalid-feedback">
                       {errors.email?.message}
@@ -158,7 +162,9 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.SSN ? "is-invalid" : ""
                       }`}
-                      {...register("SSN")}
+                      {...register("SSN", {
+                        required: "ID is required",
+                      })}
                     />
                     <div className="invalid-feedback">
                       {errors.SSN?.message}
