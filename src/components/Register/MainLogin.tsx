@@ -15,18 +15,12 @@ const Registration: React.FC = () => {
       case "doctor":
         navigate("/doctor-signin");
         break;
-      // case "admin":
-      //   navigate("/admin-signin");
-      //   break;
       case "pharmacist":
         navigate("/pharmacy-signin");
         break;
       case "laboratory":
         navigate("/lab-signin");
         break;
-      // case "patient":
-      //   navigate("/patient-signin");
-      //   break;
       default:
         break;
     }
@@ -35,8 +29,8 @@ const Registration: React.FC = () => {
   return (
     <Container className="d-flex justify-content-center align-items-center min-vh-100">
       <Card
-        className="shadow-lg"
-        style={{ width: "30rem", borderRadius: "1rem" }}>
+        className="shadow-lg w-100"
+        style={{ maxWidth: "30rem", borderRadius: "1rem" }}>
         <Card.Body className="p-4">
           <Card.Title className="text-center mb-4 fs-3 fw-bold text-primary">
             Register
@@ -46,20 +40,12 @@ const Registration: React.FC = () => {
               <Form.Label
                 as="legend"
                 column
+                xs={12}
                 sm={4}
-                className="fw-bold text-secondary">
+                className="fw-bold text-secondary text-center text-sm-start">
                 Register as:
               </Form.Label>
-              <Col sm={8}>
-                {/* <Form.Check
-                  type="radio"
-                  label="Admin"
-                  name="role"
-                  value="admin"
-                  checked={role === "admin"}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mb-2"
-                /> */}
+              <Col xs={12} sm={8}>
                 <Form.Check
                   type="radio"
                   label="Doctor"
@@ -80,22 +66,13 @@ const Registration: React.FC = () => {
                 />
                 <Form.Check
                   type="radio"
-                  label="Laboratory "
+                  label="Laboratory"
                   name="role"
                   value="laboratory"
                   checked={role === "laboratory"}
                   onChange={(e) => setRole(e.target.value)}
                   className="mb-2"
                 />
-                {/* <Form.Check
-                  type="radio"
-                  label="Patient "
-                  name="role"
-                  value="patient"
-                  checked={role === "patient"}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mb-2"
-                /> */}
               </Col>
             </Form.Group>
 
@@ -104,7 +81,7 @@ const Registration: React.FC = () => {
                 variant="primary"
                 type="submit"
                 disabled={!role}
-                className="w-25 fw-bold py-2">
+                className="fw-bold py-2">
                 Continue
               </Button>
             </div>

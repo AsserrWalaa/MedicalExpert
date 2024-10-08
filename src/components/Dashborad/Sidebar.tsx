@@ -123,6 +123,7 @@ export default function PersistentDrawerLeft() {
 
   const handleLogout = () => {
     console.log("User logged out");
+    navigate("/main-login"); // Change this path to where you want the user to be redirected
   };
 
   const menuItems = [

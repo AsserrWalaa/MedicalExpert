@@ -3,10 +3,11 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 type OTPFormInputs = {
   email: string;
-  otp: string;
+  otp: string; // We'll combine the OTP digits to this field before submission
 };
 
 const useQuery = () => {
@@ -20,32 +21,39 @@ const PharmacyOTPVerification: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
-    reset, // Added reset function
+    reset,
   } = useForm<OTPFormInputs>({
     defaultValues: {
       email: initialEmail,
+      otp: "", // Initially empty
     },
   });
+
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [resendOtpMessage, setResendOtpMessage] = useState<string | null>(null);
+  const [isResendDisabled, setIsResendDisabled] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const onSubmit: SubmitHandler<OTPFormInputs> = async (data) => {
+  // Function to handle OTP verification
+  const onSubmit: SubmitHandler<OTPFormInputs> = async () => {
+    const otpString = otp.join(""); // Combine the OTP digits into a single string
     try {
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/pharmacy/verify",
         {
-          email: data.email,
-          otp: data.otp,
+          email: initialEmail,
+          otp: otpString,
         }
       );
 
       if (response.data.status === "success") {
-        reset(); // Reset the form on success
-        setSuccessMessage("OTP verified successfully!"); // Set success message
+        reset();
+        setSuccessMessage("OTP verified successfully!");
         setTimeout(() => {
           navigate("/home");
-        }, 2000); // Redirect after 2 seconds
+        }, 2000);
       } else {
         setErrorMessage(response.data.message || "OTP verification failed.");
       }
@@ -54,6 +62,34 @@ const PharmacyOTPVerification: React.FC = () => {
     }
   };
 
+  // Function to handle Resend OTP
+  const resendOtp = async () => {
+    setErrorMessage(null);
+    setResendOtpMessage(null);
+
+    try {
+      const response = await axios.post(
+        "https://admin.medicalexpertise.net/api/pharmacy/get-otp",
+        {
+          email: initialEmail,
+        }
+      );
+
+      if (response.data.status === "success") {
+        setResendOtpMessage("OTP has been resent successfully!");
+        setIsResendDisabled(true); // Disable button for 60 seconds
+        setTimeout(() => {
+          setIsResendDisabled(false);
+        }, 60000); // 1 minute
+      } else {
+        setErrorMessage(response.data.message || "Failed to resend OTP.");
+      }
+    } catch (error) {
+      handleErrorResponse(error);
+    }
+  };
+
+  // Function to handle error responses
   const handleErrorResponse = (error: any) => {
     if (axios.isAxiosError(error) && error.response) {
       const errorData = error.response.data;
@@ -67,95 +103,86 @@ const PharmacyOTPVerification: React.FC = () => {
     }
   };
 
+  // Handle input change for OTP digits
+  const handleOtpChange = (index: number, value: string) => {
+    const newOtp = [...otp];
+    newOtp[index] = value.slice(-1); // Take only the last character (in case of more than one)
+    setOtp(newOtp);
+
+    // Move focus to the next input if the value is filled
+    if (value && index < otp.length - 1) {
+      const nextInput = document.getElementById(`otp-input-${index + 1}`);
+      if (nextInput) {
+        (nextInput as HTMLInputElement).focus();
+      }
+    }
+  };
+
   return (
-    <div className="vh-100 backgound">
+    <div className="vh-100 background">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">
             <div className="card mt-4">
               <div className="card-body">
                 <h2 className="card-title text-center">OTP Verification</h2>
-
-                {/* Success alert */}
-                {successMessage && (
-                  <div
-                    className="alert alert-success alert-dismissible fade show"
-                    role="alert">
-                    {successMessage}
-                    <button
-                      type="button"
-                      className="close"
-                      data-dismiss="alert"
-                      aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* Error alert */}
-                {errorMessage && (
-                  <div
-                    className="alert alert-danger alert-dismissible fade show"
-                    role="alert">
-                    {errorMessage}
-                    <button
-                      type="button"
-                      className="close"
-                      data-dismiss="alert"
-                      aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                )}
-
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      readOnly
-                      value={initialEmail}
-                      {...register("email", {
-                        required: "Email is required",
-                        pattern: {
-                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Invalid email address",
-                        },
-                      })}
-                    />
+                  {/* Email (Hidden Field) */}
+                  <input type="hidden" {...register("email")} />
+
+                  {/* OTP Inputs */}
+                  <div className="mb-3 d-flex justify-content-between">
+                    {otp.map((digit, index) => (
+                      <input
+                        key={index}
+                        type="text"
+                        id={`otp-input-${index}`}
+                        className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
+                          errors.otp ? "is-invalid" : ""
+                        }`}
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                      />
+                    ))}
                   </div>
 
-                  <div className="mb-3">
-                    <label className="form-label">OTP</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.otp ? "is-invalid" : ""
-                      }`}
-                      {...register("otp", {
-                        required: "OTP is required",
-                        minLength: {
-                          value: 6,
-                          message: "OTP must be 6 digits",
-                        },
-                        maxLength: {
-                          value: 6,
-                          message: "OTP must be 6 digits",
-                        },
-                      })}
-                    />
-                    <div className="invalid-feedback">
-                      {errors.otp?.message}
+                  {/* Error/Success Messages */}
+                  {errorMessage && (
+                    <div className="alert alert-danger" role="alert">
+                      {errorMessage}
                     </div>
-                  </div>
+                  )}
+                  {successMessage && (
+                    <div className="alert alert-success" role="alert">
+                      {successMessage}
+                    </div>
+                  )}
+                  {resendOtpMessage && (
+                    <div className="alert alert-info" role="alert">
+                      {resendOtpMessage}
+                    </div>
+                  )}
 
-                  <div className="d-grid">
+                  {/* Submit Button */}
+                  <div className="d-grid mb-3">
                     <button type="submit" className="btn btn-primary">
                       Verify OTP
                     </button>
                   </div>
                 </form>
+
+                {/* Resend OTP Button */}
+                <div className="d-grid">
+                  <button
+                    className="btn btn-secondary"
+                    onClick={resendOtp}
+                    disabled={isResendDisabled}>
+                    {isResendDisabled
+                      ? "Resend OTP (wait 1 minute)"
+                      : "Resend OTP"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

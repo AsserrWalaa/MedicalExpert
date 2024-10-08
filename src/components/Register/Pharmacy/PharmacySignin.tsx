@@ -4,6 +4,7 @@ import { z } from "zod";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -111,7 +112,7 @@ const PharmacySignIn: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required: "Password is required ",
                         })}
                       />
                       <button
@@ -121,9 +122,9 @@ const PharmacySignIn: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
-                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
                   </div>
 
                   {/* Sign In Button */}

@@ -4,6 +4,7 @@ import { z } from "zod";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({

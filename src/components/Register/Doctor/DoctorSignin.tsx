@@ -94,7 +94,7 @@ const DoctorSignIn: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Password Input */}
+                  {/* Password */}
                   <div className="mb-3">
                     <label className="form-label">Password</label>
                     <div className="input-group">
@@ -104,7 +104,7 @@ const DoctorSignIn: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required: "Password is required ",
                         })}
                       />
                       <button
@@ -114,11 +114,8 @@ const DoctorSignIn: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    {/* Show validation error message */}
                     {errors.password && (
-                      <div className="invalid-feedback">
-                        {errors.password.message}
-                      </div>
+                      <p className="text-danger">{errors.password.message}</p>
                     )}
                   </div>
 

@@ -7,8 +7,8 @@ import logo from "../../../assets/imgs/new logo.webp";
 
 // Define the form input types
 type OTPFormInputs = {
-  email: string; // Added email input
-  otp: string;
+  email: string;
+  otp: string[]; // Changed otp to be an array of strings (6 digits)
 };
 
 // Function to parse query parameters from URL
@@ -23,45 +23,96 @@ const PatientOTPVerification: React.FC = () => {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm<OTPFormInputs>({
     defaultValues: {
-      email: initialEmail, // Set initial value of email field
+      email: initialEmail,
+      otp: ["", "", "", "", "", ""], // Initial values for the 6 OTP fields
     },
   });
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
 
+  // Watch OTP inputs
+  const otpValues = watch("otp");
+
+  // Function to handle OTP input navigation (focus next input)
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    const value = e.target.value;
+    if (value.length === 1 && index < 5) {
+      const nextField = document.getElementById(`otp-${index + 1}`);
+      nextField?.focus();
+    }
+    if (value.length === 0 && index > 0) {
+      const prevField = document.getElementById(`otp-${index - 1}`);
+      prevField?.focus();
+    }
+  };
+
+  // Submit handler for OTP verification
   const onSubmit: SubmitHandler<OTPFormInputs> = async (data) => {
-    setLoading(true); // Start loading
+    const otp = data.otp.join(""); // Combine OTP values into a single string
+    setLoading(true);
     try {
       const response = await axios.post(
-        "https://admin.medicalexpertise.net/api/patient/verify",
+        "https://admin.medicalexpertise.net/api/patient/verify-otp",
         {
-          email: data.email, // Use email from form input
-          otp: data.otp,
+          email: data.email,
+          otp,
         }
       );
 
       if (response.data.status === "success") {
-        setSuccessMessage("OTP verified successfully!"); // Set success message
-        navigate("/patient-home");
+        setMessage("OTP verified successfully. Please log in.");
+        setIsSuccess(true);
+        setTimeout(() => {
+          navigate("/patient-signin");
+        }, 2000);
       } else {
-        setErrorMessage(response.data.message || "OTP verification failed.");
+        setMessage(response.data.message || "OTP verification failed.");
+        setIsSuccess(false);
       }
     } catch (error) {
+      console.error("OTP verification failed:", error);
       if (axios.isAxiosError(error) && error.response) {
-        const errorData = error.response.data;
-        // Handle error response
-        setErrorMessage(
-          errorData.message || "Error verifying OTP. Please try again."
-        );
+        console.error("Response data:", error.response.data);
+        setMessage(error.response.data.message || "OTP verification failed.");
       } else {
-        setErrorMessage("Error verifying OTP. Please try again.");
+        setMessage("OTP verification failed.");
       }
+      setIsSuccess(false);
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
+    }
+  };
+
+  // Function to resend OTP
+  const resendOTP = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.post(
+        "https://admin.medicalexpertise.net/api/patient/get-otp",
+        { email: initialEmail }
+      );
+
+      if (response.data.status === "success") {
+        setMessage("OTP has been resent to your email.");
+        setIsSuccess(true);
+      } else {
+        setMessage(response.data.message || "Failed to resend OTP.");
+        setIsSuccess(false);
+      }
+    } catch (error) {
+      console.error("Resend OTP failed:", error);
+      setMessage("Failed to resend OTP.");
+      setIsSuccess(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,10 +121,9 @@ const PatientOTPVerification: React.FC = () => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">
-            <div className="card mt-4 user-form ">
-              <div className="card-body ">
-                <h2 className="card-title text-center">Verify OTP</h2>
-                {/* Adjust logo size here */}
+            <div className="card mt-4 user-form">
+              <div className="card-body">
+                <h2 className="card-title text-center">OTP Verification</h2>
                 <img
                   src={logo}
                   className="d-block my-3 mx-auto"
@@ -81,70 +131,62 @@ const PatientOTPVerification: React.FC = () => {
                   height={180}
                   width={200}
                 />
-                {errorMessage && (
-                  <div className="alert alert-danger" role="alert">
-                    {errorMessage}
+                {message && (
+                  <div
+                    className={`alert ${
+                      isSuccess ? "alert-success" : "alert-danger"
+                    }`}
+                    role="alert">
+                    {message}
                   </div>
                 )}
-                {successMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {successMessage}
-                  </div>
-                )}
+
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {/* Email Input */}
-                  <div className="mb-3">
-                    <label className="form-label">Email Address</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.email ? "is-invalid" : ""
-                      }`}
-                      {...register("email", {
-                        required: "Email is required",
-                        pattern: {
-                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                          message: "Invalid email address",
-                        },
-                      })}
-                    />
-                    <div className="invalid-feedback">
-                      {errors.email?.message}
-                    </div>
-                  </div>
+                  {/* Email (Hidden Field) */}
+                  <input type="hidden" {...register("email")} />
 
-                  {/* OTP Input */}
-                  <div className="mb-3">
+                  <div className="mb-3 text-center">
                     <label className="form-label">Enter OTP</label>
-                    <input
-                      type="text"
-                      className={`form-control ${
-                        errors.otp ? "is-invalid" : ""
-                      }`}
-                      {...register("otp", {
-                        required: "OTP is required",
-                        minLength: {
-                          value: 6,
-                          message: "OTP must be 6 digits",
-                        },
-                        maxLength: {
-                          value: 6,
-                          message: "OTP must be 6 digits",
-                        },
-                      })}
-                    />
-                    <div className="invalid-feedback">
-                      {errors.otp?.message}
+                    <div className="mb-3 d-flex justify-content-between">
+                      {otpValues.map((_, index) => (
+                        <input
+                          key={index}
+                          type="text"
+                          maxLength={1}
+                          id={`otp-${index}`}
+                          className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
+                            errors.otp ? "is-invalid" : ""
+                          }`}
+                          {...register(`otp.${index}`, {
+                            required: "OTP is required",
+                            maxLength: 1,
+                            onChange: (e) => handleInputChange(e, index),
+                          })}
+                        />
+                      ))}
                     </div>
+                    {errors.otp && (
+                      <p className="text-danger">
+                        Please enter a valid 6-digit OTP.
+                      </p>
+                    )}
                   </div>
 
-                  {/* Submit Button */}
                   <div className="d-grid">
                     <button
                       type="submit"
                       className="btn btn-primary"
                       disabled={loading}>
                       {loading ? "Verifying..." : "Verify OTP"}
+                    </button>
+                  </div>
+
+                  <div className="d-grid mt-2">
+                    <button
+                      className="btn btn-secondary"
+                      onClick={resendOTP}
+                      disabled={loading}>
+                      {loading ? "Resending OTP..." : "Resend OTP"}
                     </button>
                   </div>
                 </form>

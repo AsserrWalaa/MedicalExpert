@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -31,7 +32,6 @@ const schema = z.object({
   confirmPassword: z.string().nonempty("Confirm password is required"),
 });
 
-// Type inferred from the schema
 type SchemaType = z.infer<typeof schema>;
 
 const PharmacySignUp: React.FC = () => {
@@ -71,7 +71,7 @@ const PharmacySignUp: React.FC = () => {
 
       if (response.data.status === "success") {
         alert(response.data.message); // Show success message
-        navigate("/pharmacy-reg-otp"); // Navigate to OTP verification page
+        navigate(`/pharmacy-reg-otp?email=${encodeURIComponent(data.email)}`); // Pass email to OTP verification page
       }
     } catch (error) {
       console.error("Registration failed:", error);
@@ -101,7 +101,7 @@ const PharmacySignUp: React.FC = () => {
                       {...register("pharmacyName", {
                         required: "Pharmacy name is required",
                       })}
-                      disabled={loading} // Disable input when loading
+                      disabled={loading}
                     />
                     <div className="invalid-feedback">
                       {errors.pharmacyName?.message}
@@ -116,8 +116,8 @@ const PharmacySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email")}
-                      disabled={loading} // Disable input when loading
+                      {...register("email", { required: "Email is required" })}
+                      disabled={loading}
                     />
                     <div className="invalid-feedback">
                       {errors.email?.message}
@@ -135,7 +135,7 @@ const PharmacySignUp: React.FC = () => {
                       {...register("pharmacyId", {
                         required: "ID is required",
                       })}
-                      disabled={loading} // Disable input when loading
+                      disabled={loading}
                     />
                     <div className="invalid-feedback">
                       {errors.pharmacyId?.message}
@@ -152,9 +152,9 @@ const PharmacySignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required:
+                            "the password must contain an uppercase letter , lowercase letter , symbols , and numbers ",
                         })}
-                        disabled={loading} // Disable input when loading
                       />
                       <button
                         type="button"
@@ -163,11 +163,10 @@ const PharmacySignUp: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
-                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
                   </div>
-
                   {/* Confirm Password */}
                   <div className="mb-3">
                     <label className="form-label">Confirm Password</label>
@@ -180,7 +179,6 @@ const PharmacySignUp: React.FC = () => {
                         {...register("confirmPassword", {
                           required: "Confirm password",
                         })}
-                        disabled={loading} // Disable input when loading
                       />
                       <button
                         type="button"
@@ -191,9 +189,11 @@ const PharmacySignUp: React.FC = () => {
                         {confirmPasswordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.confirmPassword?.message}
-                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-danger">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
                   </div>
 
                   {/* Sign Up Button */}
@@ -203,6 +203,15 @@ const PharmacySignUp: React.FC = () => {
                       className="btn btn-primary"
                       disabled={loading}>
                       {loading ? "Signing Up..." : "Sign Up"}
+                    </button>
+                  </div>
+                  {/* Don't have an account */}
+                  <div className="text-center mt-3">
+                    <button
+                      type="button"
+                      className="btn btn-link"
+                      onClick={() => navigate("/pharmacy-signin")}>
+                      Already have an account? Signin
                     </button>
                   </div>
                 </form>

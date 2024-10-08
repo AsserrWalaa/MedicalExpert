@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import logo from "../../../assets/imgs/new logo.webp";
 
 import "../../index.css";
+
 // Define the validation schema using Zod
 const schema = z.object({
   patientName: z
@@ -41,7 +42,7 @@ const PatientSignUp: React.FC = () => {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [isSuccess, setIsSuccess] = useState(false); // Track success or failure
+  const [isSuccess, setIsSuccess] = useState(false);
   const navigate = useNavigate();
 
   const {
@@ -69,7 +70,7 @@ const PatientSignUp: React.FC = () => {
           email: data.email,
           password: data.password,
           password_confirmation: data.confirmPassword,
-          SSN: data.SSN, // Adjusted key to match expected API structure
+          SSN: data.SSN,
         }
       );
 
@@ -77,7 +78,7 @@ const PatientSignUp: React.FC = () => {
         setMessage("Registration successful. Please complete registration.");
         setIsSuccess(true);
         setTimeout(() => {
-          navigate("/patient-reg-otp");
+          navigate(`/patient-reg-otp?email=${data.email}`); // Pass email to OTP verification
         }, 2000);
       } else {
         setMessage(
@@ -88,7 +89,7 @@ const PatientSignUp: React.FC = () => {
     } catch (error) {
       console.error("Registration failed:", error);
       if (axios.isAxiosError(error) && error.response) {
-        console.error("Response data:", error.response.data); // Log server response
+        console.error("Response data:", error.response.data);
         setMessage(
           error.response.data.message ||
             "Registration failed. Please try again."
@@ -110,7 +111,6 @@ const PatientSignUp: React.FC = () => {
             <div className="card mt-4 user-form ">
               <div className="card-body ">
                 <h2 className="card-title text-center">Patient SignUp</h2>
-                {/* Adjust logo size here */}
                 <img
                   src={logo}
                   className="d-block my-3 mx-auto"
@@ -118,7 +118,6 @@ const PatientSignUp: React.FC = () => {
                   height={180}
                   width={200}
                 />
-                {/* Alert Message */}
                 {message && (
                   <div
                     className={`alert ${
@@ -130,7 +129,6 @@ const PatientSignUp: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {/* Patient Name */}
                   <div className="mb-3">
                     <label className="form-label">Patient Name</label>
                     <input
@@ -149,7 +147,6 @@ const PatientSignUp: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Email */}
                   <div className="mb-3">
                     <label className="form-label">Email</label>
                     <input
@@ -166,7 +163,6 @@ const PatientSignUp: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Patient ID */}
                   <div className="mb-3">
                     <label className="form-label">Patient ID</label>
                     <input
@@ -183,7 +179,6 @@ const PatientSignUp: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Password */}
                   <div className="mb-3">
                     <label className="form-label">Password</label>
                     <div className="input-group">
@@ -193,7 +188,8 @@ const PatientSignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required:
+                            "the password must contain an uppercase letter , lowercase letter , symbols , and numbers ",
                         })}
                       />
                       <button
@@ -208,7 +204,6 @@ const PatientSignUp: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="mb-3">
                     <label className="form-label">Confirm Password</label>
                     <div className="input-group">
@@ -237,7 +232,6 @@ const PatientSignUp: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Sign Up Button */}
                   <div className="d-grid">
                     <button
                       type="submit"
@@ -247,7 +241,6 @@ const PatientSignUp: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Already have an account */}
                   <div className="text-center mt-3">
                     <button
                       type="button"

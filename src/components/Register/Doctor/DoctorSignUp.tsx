@@ -39,8 +39,8 @@ type SchemaType = z.infer<typeof schema>;
 const DoctorSignUp: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state for the API call
-  const [formError, setFormError] = useState(""); // State to hold error message from API
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const navigate = useNavigate();
 
   const {
@@ -65,17 +65,14 @@ const DoctorSignUp: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<SchemaType> = async (data) => {
-    // Clear any previous form error
     setFormError("");
 
-    // Manual validation
     if (!validateForm(data)) {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
-      // Make the API call using Axios with correct payload structure
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/doctor/register",
         {
@@ -87,9 +84,8 @@ const DoctorSignUp: React.FC = () => {
         }
       );
 
-      // Check if the registration was successful
       if (response.data.status === "success") {
-        navigate("/doctor-reg-otp");
+        navigate(`/doctor-reg-otp?email=${encodeURIComponent(data.email)}`); // Pass email as a query parameter
       } else {
         setFormError("Registration failed. Please try again.");
       }
@@ -118,7 +114,6 @@ const DoctorSignUp: React.FC = () => {
               <div className="card-body">
                 <h2 className="card-title text-center">Doctor SignUp</h2>
 
-                {/* Form-level error message */}
                 {formError && (
                   <div className="alert alert-danger" role="alert">
                     {formError}
@@ -126,7 +121,8 @@ const DoctorSignUp: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {/* Name Input */}
+                  {/* Form Fields */}
+                  {/* Name, Email, SSN, Password, Confirm Password Inputs */}
                   <div className="mb-3">
                     <label className="form-label">Name</label>
                     <input
@@ -134,14 +130,13 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.name ? "is-invalid" : ""
                       }`}
-                      {...register("name", { required: "Name is required" })}
+                      {...register("name")}
                     />
                     <div className="invalid-feedback">
                       {errors.name?.message}
                     </div>
                   </div>
 
-                  {/* Email Input */}
                   <div className="mb-3">
                     <label className="form-label">Email</label>
                     <input
@@ -149,14 +144,13 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email", { required: "Email is required" })}
+                      {...register("email")}
                     />
                     <div className="invalid-feedback">
                       {errors.email?.message}
                     </div>
                   </div>
 
-                  {/* SSN Input */}
                   <div className="mb-3">
                     <label className="form-label">National ID</label>
                     <input
@@ -164,14 +158,14 @@ const DoctorSignUp: React.FC = () => {
                       className={`form-control ${
                         errors.SSN ? "is-invalid" : ""
                       }`}
-                      {...register("SSN", { required: "ID is required" })}
+                      {...register("SSN")}
                     />
                     <div className="invalid-feedback">
                       {errors.SSN?.message}
                     </div>
                   </div>
 
-                  {/* Password Input */}
+                  {/* New Password */}
                   <div className="mb-3">
                     <label className="form-label">Password</label>
                     <div className="input-group">
@@ -181,7 +175,8 @@ const DoctorSignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required:
+                            "the password must contain an uppercase letter , lowercase letter , symbols , and numbers ",
                         })}
                       />
                       <button
@@ -191,12 +186,12 @@ const DoctorSignUp: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
-                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
                   </div>
 
-                  {/* Confirm Password Input */}
+                  {/* Confirm Password */}
                   <div className="mb-3">
                     <label className="form-label">Confirm Password</label>
                     <div className="input-group">
@@ -206,7 +201,7 @@ const DoctorSignUp: React.FC = () => {
                           errors.confirmPassword ? "is-invalid" : ""
                         }`}
                         {...register("confirmPassword", {
-                          required: "Confirm password is required",
+                          required: "Confirm password",
                         })}
                       />
                       <button
@@ -218,12 +213,12 @@ const DoctorSignUp: React.FC = () => {
                         {confirmPasswordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.confirmPassword?.message}
-                    </div>
+                    {errors.confirmPassword && (
+                      <p className="text-danger">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
                   </div>
-
-                  {/* Sign Up Button */}
                   <div className="d-grid mb-3">
                     <button
                       type="submit"

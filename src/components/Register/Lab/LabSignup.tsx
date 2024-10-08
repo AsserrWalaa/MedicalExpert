@@ -4,6 +4,7 @@ import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "bootstrap/dist/css/bootstrap.min.css";
+import "../../index.css";
 
 // Define the validation schema using Zod
 const schema = z.object({
@@ -63,15 +64,14 @@ const LaboratorySignUp: React.FC = () => {
     setModalMessage("");
 
     try {
-      // Send the data with the specified API format
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/lab/register",
         {
-          name: data.laboratoryName, // Matches key "name"
-          email: data.email, // Matches key "email"
-          password: data.password, // Matches key "password"
-          password_confirmation: data.confirmPassword, // Matches key "password_confirmation"
-          lab_id: data.laboratoryId, // Matches key "lab_id"
+          name: data.laboratoryName,
+          email: data.email,
+          password: data.password,
+          password_confirmation: data.confirmPassword,
+          lab_id: data.laboratoryId,
         }
       );
 
@@ -79,7 +79,8 @@ const LaboratorySignUp: React.FC = () => {
         setModalMessage(
           "Registration successful! Please check your email for OTP verification."
         );
-        navigate("/lab-reg-otp"); // Redirect after success
+        // Pass the email as a query parameter
+        navigate(`/lab-reg-otp?email=${encodeURIComponent(data.email)}`);
       } else {
         throw new Error(response.data.message || "Registration failed");
       }
@@ -112,7 +113,6 @@ const LaboratorySignUp: React.FC = () => {
                     {errorMessage}
                   </div>
                 )}
-
                 {/* Success Alert */}
                 {modalMessage && (
                   <div className="alert alert-success" role="alert">
@@ -148,9 +148,7 @@ const LaboratorySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email", {
-                        required: "Email is required",
-                      })}
+                      {...register("email", { required: "Email is required" })}
                     />
                     {errors.email && (
                       <div className="invalid-feedback">
@@ -168,7 +166,7 @@ const LaboratorySignUp: React.FC = () => {
                         errors.laboratoryId ? "is-invalid" : ""
                       }`}
                       {...register("laboratoryId", {
-                        required: "LaboratoryId is required",
+                        required: "Laboratory ID is required",
                       })}
                     />
                     {errors.laboratoryId && (
@@ -188,7 +186,8 @@ const LaboratorySignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required:
+                            "Password must contain an uppercase letter, lowercase letter, symbols, and numbers",
                         })}
                       />
                       <button
@@ -199,9 +198,7 @@ const LaboratorySignUp: React.FC = () => {
                       </button>
                     </div>
                     {errors.password && (
-                      <div className="invalid-feedback">
-                        {errors.password?.message}
-                      </div>
+                      <p className="text-danger">{errors.password.message}</p>
                     )}
                   </div>
 
@@ -214,8 +211,8 @@ const LaboratorySignUp: React.FC = () => {
                         className={`form-control ${
                           errors.confirmPassword ? "is-invalid" : ""
                         }`}
-                        {...register("password", {
-                          required: "Confirm password ",
+                        {...register("confirmPassword", {
+                          required: "Confirm password is required",
                         })}
                       />
                       <button
@@ -228,9 +225,9 @@ const LaboratorySignUp: React.FC = () => {
                       </button>
                     </div>
                     {errors.confirmPassword && (
-                      <div className="invalid-feedback">
-                        {errors.confirmPassword?.message}
-                      </div>
+                      <p className="text-danger">
+                        {errors.confirmPassword.message}
+                      </p>
                     )}
                   </div>
 

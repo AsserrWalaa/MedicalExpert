@@ -82,7 +82,7 @@ const PatientSignIn: React.FC = () => {
           <div className="col-md-6">
             <div className="card mt-4 user-form">
               <div className="card-body">
-                <h2 className="card-title text-center">Patient SignUp</h2>
+                <h2 className="card-title text-center">Patient SignIn</h2>
 
                 {/* Adjust logo size here */}
                 <img
@@ -128,6 +128,7 @@ const PatientSignIn: React.FC = () => {
                   </div>
 
                   {/* Password */}
+                  {/* Password */}
                   <div className="mb-3">
                     <label className="form-label">Password</label>
                     <div className="input-group">
@@ -137,7 +138,7 @@ const PatientSignIn: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required: "Password is required ",
                         })}
                       />
                       <button
@@ -147,11 +148,10 @@ const PatientSignIn: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
-                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
                   </div>
-
                   {/* Sign In Button */}
                   <div className="d-grid">
                     <button
