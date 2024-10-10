@@ -80,7 +80,7 @@ const DoctorReset: React.FC = () => {
     };
 
     try {
-      const response = await axios.post(
+      await axios.post(
         "https://admin.medicalexpertise.net/api/lab/password/reset",
         apiData
       );
