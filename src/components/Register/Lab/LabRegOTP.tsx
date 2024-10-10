@@ -7,14 +7,14 @@ import "../../index.css";
 
 type OTPFormInputs = {
   email: string;
-  otp: string; // We'll combine the OTP digits to this field before submission
+  otp: string[]; // Change to an array for OTP digits
 };
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
 };
 
-const LaboratoryOTPVerification: React.FC = () => {
+const OTPVerification: React.FC = () => {
   const query = useQuery();
   const initialEmail = query.get("email") || "";
   const {
@@ -25,7 +25,7 @@ const LaboratoryOTPVerification: React.FC = () => {
   } = useForm<OTPFormInputs>({
     defaultValues: {
       email: initialEmail,
-      otp: "", // Initially empty
+      otp: new Array(6).fill(""), // Initialize OTP as an array
     },
   });
 
@@ -36,6 +36,7 @@ const LaboratoryOTPVerification: React.FC = () => {
   const [isResendDisabled, setIsResendDisabled] = useState<boolean>(false);
   const navigate = useNavigate();
 
+  // Function to handle OTP verification
   const onSubmit: SubmitHandler<OTPFormInputs> = async () => {
     const otpString = otp.join(""); // Combine the OTP digits into a single string
     try {
@@ -51,7 +52,7 @@ const LaboratoryOTPVerification: React.FC = () => {
         reset();
         setSuccessMessage("OTP verified successfully!");
         setTimeout(() => {
-          navigate("/lab-signin");
+          navigate("/home");
         }, 2000);
       } else {
         setErrorMessage(response.data.message || "OTP verification failed.");
@@ -61,6 +62,7 @@ const LaboratoryOTPVerification: React.FC = () => {
     }
   };
 
+  // Function to handle Resend OTP
   const resendOtp = async () => {
     setErrorMessage(null);
     setResendOtpMessage(null);
@@ -87,6 +89,7 @@ const LaboratoryOTPVerification: React.FC = () => {
     }
   };
 
+  // Function to handle error responses
   const handleErrorResponse = (error: any) => {
     if (axios.isAxiosError(error) && error.response) {
       const errorData = error.response.data;
@@ -100,6 +103,7 @@ const LaboratoryOTPVerification: React.FC = () => {
     }
   };
 
+  // Handle input change for OTP digits
   const handleOtpChange = (index: number, value: string) => {
     const newOtp = [...otp];
     newOtp[index] = value.slice(-1); // Take only the last character (in case of more than one)
@@ -134,10 +138,13 @@ const LaboratoryOTPVerification: React.FC = () => {
                         type="text"
                         id={`otp-input-${index}`}
                         className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
-                          errors.otp ? "is-invalid" : ""
+                          errors.otp && !digit ? "is-invalid" : ""
                         }`}
                         maxLength={1}
                         value={digit}
+                        {...register(`otp.${index}`, {
+                          required: true, // Require all digits
+                        })}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                       />
                     ))}
@@ -188,4 +195,4 @@ const LaboratoryOTPVerification: React.FC = () => {
   );
 };
 
-export default LaboratoryOTPVerification;
+export default OTPVerification;

@@ -7,30 +7,35 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../index.css";
 
 // Define the validation schema using Zod
-const schema = z.object({
-  pharmacyName: z
-    .string()
-    .min(4, "Pharmacy name must be at least 4 characters")
-    .max(30, "Pharmacy name must be at most 30 characters")
-    .nonempty("Pharmacy name is required"),
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .nonempty("Email is required"),
-  pharmacyId: z
-    .string()
-    .regex(/^\d+$/, "Pharmacy ID must be numeric")
-    .nonempty("Pharmacy ID is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-    .regex(/[a-z]/, "Password must have at least one lowercase letter")
-    .regex(/\d/, "Password must have at least one number")
-    .regex(/[@$!%*?&#]/, "Password must have at least one special character")
-    .nonempty("Password is required"),
-  confirmPassword: z.string().nonempty("Confirm password is required"),
-});
+const schema = z
+  .object({
+    pharmacyName: z
+      .string()
+      .min(4, "Pharmacy name must be at least 4 characters")
+      .max(30, "Pharmacy name must be at most 30 characters")
+      .nonempty("Pharmacy name is required"),
+    email: z
+      .string()
+      .email("Please enter a valid email")
+      .nonempty("Email is required"),
+    pharmacyId: z
+      .string()
+      .regex(/^\d+$/, "Pharmacy ID must be numeric")
+      .nonempty("Pharmacy ID is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must have at least one uppercase letter")
+      .regex(/[a-z]/, "Password must have at least one lowercase letter")
+      .regex(/\d/, "Password must have at least one number")
+      .regex(/[@$!%*?&#]/, "Password must have at least one special character")
+      .nonempty("Password is required"),
+    confirmPassword: z.string().nonempty("Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match",
+  });
 
 type SchemaType = z.infer<typeof schema>;
 
@@ -38,6 +43,7 @@ const PharmacySignUp: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState("");
   const navigate = useNavigate();
 
   const {
@@ -47,12 +53,24 @@ const PharmacySignUp: React.FC = () => {
     setError,
   } = useForm<SchemaType>();
 
-  const onSubmit: SubmitHandler<SchemaType> = async (data) => {
-    if (data.password !== data.confirmPassword) {
-      setError("confirmPassword", {
-        type: "manual",
-        message: "Passwords must match",
+  const validateForm = (data: SchemaType) => {
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        setError(issue.path[0] as keyof SchemaType, {
+          type: "manual",
+          message: issue.message,
+        });
       });
+      return false;
+    }
+    return true;
+  };
+
+  const onSubmit: SubmitHandler<SchemaType> = async (data) => {
+    setFormError("");
+
+    if (!validateForm(data)) {
       return;
     }
 
@@ -70,12 +88,21 @@ const PharmacySignUp: React.FC = () => {
       );
 
       if (response.data.status === "success") {
-        alert(response.data.message); // Show success message
-        navigate(`/pharmacy-reg-otp?email=${encodeURIComponent(data.email)}`); // Pass email to OTP verification page
+        navigate(`/pharmacy-reg-otp?email=${encodeURIComponent(data.email)}`);
+      } else {
+        setFormError("Registration failed. Please try again.");
       }
     } catch (error) {
-      console.error("Registration failed:", error);
-      alert("Registration failed. Please try again.");
+      if (axios.isAxiosError(error)) {
+        console.error("Error response:", error.response?.data);
+        setFormError(
+          error.response?.data?.message ||
+            "Registration failed. Please try again."
+        );
+      } else {
+        console.error("Error:", error);
+        setFormError("An unexpected error occurred. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -89,6 +116,13 @@ const PharmacySignUp: React.FC = () => {
             <div className="card mt-4">
               <div className="card-body">
                 <h2 className="card-title text-center">Pharmacy Sign Up</h2>
+
+                {formError && (
+                  <div className="alert alert-danger" role="alert">
+                    {formError}
+                  </div>
+                )}
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* Pharmacy Name */}
                   <div className="mb-3">
@@ -116,7 +150,9 @@ const PharmacySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email", { required: "Email is required" })}
+                      {...register("email", {
+                        required: "Email is required",
+                      })}
                       disabled={loading}
                     />
                     <div className="invalid-feedback">
@@ -133,7 +169,7 @@ const PharmacySignUp: React.FC = () => {
                         errors.pharmacyId ? "is-invalid" : ""
                       }`}
                       {...register("pharmacyId", {
-                        required: "ID is required",
+                        required: "Pharmacy ID is required",
                       })}
                       disabled={loading}
                     />
@@ -142,7 +178,7 @@ const PharmacySignUp: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* New Password */}
+                  {/* Password */}
                   <div className="mb-3">
                     <label className="form-label">Password</label>
                     <div className="input-group">
@@ -152,8 +188,7 @@ const PharmacySignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required:
-                            "the password must contain an uppercase letter , lowercase letter , symbols , and numbers ",
+                          required: "Password is required",
                         })}
                       />
                       <button
@@ -167,6 +202,7 @@ const PharmacySignUp: React.FC = () => {
                       <p className="text-danger">{errors.password.message}</p>
                     )}
                   </div>
+
                   {/* Confirm Password */}
                   <div className="mb-3">
                     <label className="form-label">Confirm Password</label>
@@ -177,7 +213,7 @@ const PharmacySignUp: React.FC = () => {
                           errors.confirmPassword ? "is-invalid" : ""
                         }`}
                         {...register("confirmPassword", {
-                          required: "Confirm password",
+                          required: "Confirm password is required",
                         })}
                       />
                       <button
@@ -205,13 +241,14 @@ const PharmacySignUp: React.FC = () => {
                       {loading ? "Signing Up..." : "Sign Up"}
                     </button>
                   </div>
-                  {/* Don't have an account */}
+
+                  {/* Already have an account */}
                   <div className="text-center mt-3">
                     <button
                       type="button"
                       className="btn btn-link"
                       onClick={() => navigate("/pharmacy-signin")}>
-                      Already have an account? Signin
+                      Already have an account? Sign In
                     </button>
                   </div>
                 </form>

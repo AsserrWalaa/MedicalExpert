@@ -21,10 +21,13 @@ const schema = z
     password: z
       .string()
       .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-      .regex(/[a-z]/, "Password must have at least one lowercase letter")
-      .regex(/\d/, "Password must have at least one number")
-      .regex(/[@$!%*?&#]/, "Password must have at least one special character")
+      .regex(/[A-Z]/, "Password must have at least one uppercase letter (A-Z)")
+      .regex(/[a-z]/, "Password must have at least one lowercase letter (a-z)")
+      .regex(/\d/, "Password must have at least one number (0-9)")
+      .regex(
+        /[@$!%*?&#]/,
+        "Password must have at least one special character (e.g. @, #)"
+      )
       .nonempty("Password is required"),
     confirmPassword: z.string().nonempty("Confirm password is required"),
   })
@@ -181,8 +184,7 @@ const DoctorSignUp: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required:
-                            "the password must contain an uppercase letter , lowercase letter , symbols , and numbers ",
+                          required: "Password is required",
                         })}
                       />
                       <button

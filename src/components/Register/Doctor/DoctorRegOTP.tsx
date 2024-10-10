@@ -7,14 +7,14 @@ import "../../index.css";
 
 type OTPFormInputs = {
   email: string;
-  otp: string; // We'll combine the OTP digits to this field before submission
+  otp: string[]; // Change to an array for OTP digits
 };
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
 };
 
-const DoctorOTPVerification: React.FC = () => {
+const OTPVerification: React.FC = () => {
   const query = useQuery();
   const initialEmail = query.get("email") || "";
   const {
@@ -25,7 +25,7 @@ const DoctorOTPVerification: React.FC = () => {
   } = useForm<OTPFormInputs>({
     defaultValues: {
       email: initialEmail,
-      otp: "", // Initially empty
+      otp: new Array(6).fill(""), // Initialize OTP as an array
     },
   });
 
@@ -52,7 +52,7 @@ const DoctorOTPVerification: React.FC = () => {
         reset();
         setSuccessMessage("OTP verified successfully!");
         setTimeout(() => {
-          navigate("/home"); // Adjust the navigation path as needed
+          navigate("/home");
         }, 2000);
       } else {
         setErrorMessage(response.data.message || "OTP verification failed.");
@@ -138,10 +138,13 @@ const DoctorOTPVerification: React.FC = () => {
                         type="text"
                         id={`otp-input-${index}`}
                         className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
-                          errors.otp ? "is-invalid" : ""
+                          errors.otp && !digit ? "is-invalid" : ""
                         }`}
                         maxLength={1}
                         value={digit}
+                        {...register(`otp.${index}`, {
+                          required: true, // Require all digits
+                        })}
                         onChange={(e) => handleOtpChange(index, e.target.value)}
                       />
                     ))}
@@ -192,4 +195,4 @@ const DoctorOTPVerification: React.FC = () => {
   );
 };
 
-export default DoctorOTPVerification;
+export default OTPVerification;

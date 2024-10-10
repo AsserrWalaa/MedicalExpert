@@ -52,12 +52,20 @@ const ForgotPasswordRequest: React.FC = () => {
       } catch (error) {
         console.error("Error sending OTP:", error);
         if (axios.isAxiosError(error)) {
-          const errorMsg =
-            error.response?.data?.message ||
-            "Failed to send OTP. Please try again.";
-          setError("email", { type: "manual", message: errorMsg });
-          setMessage(errorMsg);
-          setMessageType("error");
+          // Check for status code 500
+          if (error.response?.status === 500) {
+            const errorMsg = "Email is not verified. Please check your email.";
+            setError("email", { type: "manual", message: errorMsg });
+            setMessage(errorMsg);
+            setMessageType("error");
+          } else {
+            const errorMsg =
+              error.response?.data?.message ||
+              "Failed to send OTP. Please try again.";
+            setError("email", { type: "manual", message: errorMsg });
+            setMessage(errorMsg);
+            setMessageType("error");
+          }
         }
       } finally {
         setLoading(false);

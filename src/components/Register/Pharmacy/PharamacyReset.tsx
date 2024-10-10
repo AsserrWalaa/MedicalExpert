@@ -25,7 +25,7 @@ const schema = z.object({
 
 type SchemaType = z.infer<typeof schema>;
 
-const DoctorReset: React.FC = () => {
+const Reset: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
@@ -48,24 +48,23 @@ const DoctorReset: React.FC = () => {
   const [otp, setOtp] = useState(Array(6).fill(""));
 
   const handleOtpChange = (index: number, value: string) => {
-    // Update OTP value in the array
     const newOtp = [...otp];
     newOtp[index] = value;
 
-    // Move to the next input field if length is 1
+    // Move to the next input if a digit is entered and stay within the bounds of OTP length
     if (value.length === 1 && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       nextInput?.focus();
     }
 
-    // Move to the previous input field if backspacing
+    // Move to the previous input if backspace is pressed and stay within the bounds
     if (value.length === 0 && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       prevInput?.focus();
     }
 
+    // Set the OTP value
     setOtp(newOtp);
-    // Update form value for validation
     setValue("otp", newOtp.join(""));
   };
 
@@ -84,28 +83,39 @@ const DoctorReset: React.FC = () => {
     };
 
     try {
-      // Perform the API call to reset the password
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/pharmacy/password/reset",
         apiData
       );
 
-      console.log("Response data:", response.data);
-
-      // Show success message and reset form
       setSuccessMessage("Password reset successful!");
       setErrorMessage(null);
       setPasswordsMatch(true);
       setLoading(false);
 
-      // Redirect after a delay
       setTimeout(() => {
         navigate("/pharmacy-signin");
       }, 2000);
-    } catch (error) {
-      setErrorMessage("Failed to reset password. Please try again.");
-      setSuccessMessage(null);
+    } catch (error: any) {
       setLoading(false);
+
+      // Handle specific error codes
+      if (error.response && error.response.status === 401) {
+        setErrorMessage("OTP is incorrect");
+      } else if (error.response && error.response.status === 422) {
+        const passwordErrors = error.response.data.errors?.password;
+        if (passwordErrors) {
+          setErrorMessage(
+            "The password must contain an uppercase letter (A-Z), a lowercase letter (a-z), symbols (e.g., @, #), and numbers (1-9)."
+          );
+        } else {
+          setErrorMessage("Failed to reset password. Please try again.");
+        }
+      } else {
+        setErrorMessage("Failed to reset password. Please try again.");
+      }
+
+      setSuccessMessage(null);
     }
   };
 
@@ -133,7 +143,6 @@ const DoctorReset: React.FC = () => {
                 )}
 
                 <form onSubmit={handleSubmit(onSubmit)}>
-                  {/* Hidden Email Input */}
                   <input type="hidden" value={email} />
                   <div className="mb-3">
                     <label className="form-label">OTP</label>
@@ -144,6 +153,8 @@ const DoctorReset: React.FC = () => {
                           id={`otp-${index}`}
                           type="text"
                           maxLength={1}
+                          required
+                          pattern="\d*"
                           className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
                             errors.otp ? "is-invalid" : ""
                           }`}
@@ -154,6 +165,11 @@ const DoctorReset: React.FC = () => {
                               e.target.value.replace(/\D/g, "")
                             )
                           }
+                          onInput={(e) => {
+                            const value = e.currentTarget.value;
+                            // Only allow numeric characters
+                            e.currentTarget.value = value.replace(/\D/g, "");
+                          }}
                         />
                       ))}
                     </div>
@@ -235,4 +251,4 @@ const DoctorReset: React.FC = () => {
   );
 };
 
-export default DoctorReset;
+export default Reset;

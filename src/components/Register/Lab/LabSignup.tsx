@@ -7,30 +7,35 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "../../index.css";
 
 // Define the validation schema using Zod
-const schema = z.object({
-  laboratoryName: z
-    .string()
-    .min(4, "Laboratory name must be at least 4 characters")
-    .max(30, "Laboratory name must be at most 30 characters")
-    .nonempty("Laboratory name is required"),
-  email: z
-    .string()
-    .email("Please enter a valid email")
-    .nonempty("Email is required"),
-  laboratoryId: z
-    .string()
-    .regex(/^\d+$/, "Please enter a valid laboratory ID")
-    .nonempty("Laboratory ID is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must have at least one uppercase letter")
-    .regex(/[a-z]/, "Password must have at least one lowercase letter")
-    .regex(/\d/, "Password must have at least one number")
-    .regex(/[@$!%*?&#]/, "Password must have at least one special character")
-    .nonempty("Password is required"),
-  confirmPassword: z.string().nonempty("Confirm password is required"),
-});
+const schema = z
+  .object({
+    laboratoryName: z
+      .string()
+      .min(4, "Laboratory name must be at least 4 characters")
+      .max(30, "Laboratory name must be at most 30 characters")
+      .nonempty("Laboratory name is required"),
+    email: z
+      .string()
+      .email("Please enter a valid email")
+      .nonempty("Email is required"),
+    laboratoryId: z
+      .string()
+      .regex(/^\d+$/, "Please enter a valid laboratory ID")
+      .nonempty("Laboratory ID is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must have at least one uppercase letter")
+      .regex(/[a-z]/, "Password must have at least one lowercase letter")
+      .regex(/\d/, "Password must have at least one number")
+      .regex(/[@$!%*?&#]/, "Password must have at least one special character")
+      .nonempty("Password is required"),
+    confirmPassword: z.string().nonempty("Confirm password is required"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords must match",
+  });
 
 // Type inferred from the schema
 type SchemaType = z.infer<typeof schema>;
@@ -39,8 +44,7 @@ const LaboratorySignUp: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [modalMessage, setModalMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [formError, setFormError] = useState("");
   const navigate = useNavigate();
 
   const {
@@ -50,19 +54,28 @@ const LaboratorySignUp: React.FC = () => {
     setError,
   } = useForm<SchemaType>();
 
-  const onSubmit: SubmitHandler<SchemaType> = async (data) => {
-    if (data.password !== data.confirmPassword) {
-      setError("confirmPassword", {
-        type: "manual",
-        message: "Passwords must match",
+  const validateForm = (data: SchemaType) => {
+    const result = schema.safeParse(data);
+    if (!result.success) {
+      result.error.issues.forEach((issue) => {
+        setError(issue.path[0] as keyof SchemaType, {
+          type: "manual",
+          message: issue.message,
+        });
       });
+      return false;
+    }
+    return true;
+  };
+
+  const onSubmit: SubmitHandler<SchemaType> = async (data) => {
+    setFormError("");
+
+    if (!validateForm(data)) {
       return;
     }
 
     setLoading(true);
-    setErrorMessage("");
-    setModalMessage("");
-
     try {
       const response = await axios.post(
         "https://admin.medicalexpertise.net/api/lab/register",
@@ -76,22 +89,18 @@ const LaboratorySignUp: React.FC = () => {
       );
 
       if (response.data.status === "success") {
-        setModalMessage(
-          "Registration successful! Please check your email for OTP verification."
-        );
-        // Pass the email as a query parameter
-        navigate(`/lab-reg-otp?email=${encodeURIComponent(data.email)}`);
+        navigate(`/lab-reg-otp?email=${encodeURIComponent(data.email)}`); // Pass email as a query parameter
       } else {
-        throw new Error(response.data.message || "Registration failed");
+        setFormError("Registration failed. Please try again.");
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        setErrorMessage(
+        setFormError(
           error.response?.data?.message ||
             "Registration failed. Please try again."
         );
       } else {
-        setErrorMessage("An unexpected error occurred. Please try again.");
+        setFormError("An unexpected error occurred. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -103,20 +112,13 @@ const LaboratorySignUp: React.FC = () => {
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">
-            <div className="card mt-4 mb-3">
+            <div className="card mt-4">
               <div className="card-body">
                 <h2 className="card-title text-center">Laboratory SignUp</h2>
 
-                {/* Error Alert */}
-                {errorMessage && (
+                {formError && (
                   <div className="alert alert-danger" role="alert">
-                    {errorMessage}
-                  </div>
-                )}
-                {/* Success Alert */}
-                {modalMessage && (
-                  <div className="alert alert-success" role="alert">
-                    {modalMessage}
+                    {formError}
                   </div>
                 )}
 
@@ -129,9 +131,7 @@ const LaboratorySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.laboratoryName ? "is-invalid" : ""
                       }`}
-                      {...register("laboratoryName", {
-                        required: "Laboratory name is required",
-                      })}
+                      {...register("laboratoryName")}
                     />
                     {errors.laboratoryName && (
                       <div className="invalid-feedback">
@@ -148,7 +148,7 @@ const LaboratorySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.email ? "is-invalid" : ""
                       }`}
-                      {...register("email", { required: "Email is required" })}
+                      {...register("email")}
                     />
                     {errors.email && (
                       <div className="invalid-feedback">
@@ -165,9 +165,7 @@ const LaboratorySignUp: React.FC = () => {
                       className={`form-control ${
                         errors.laboratoryId ? "is-invalid" : ""
                       }`}
-                      {...register("laboratoryId", {
-                        required: "Laboratory ID is required",
-                      })}
+                      {...register("laboratoryId")}
                     />
                     {errors.laboratoryId && (
                       <div className="invalid-feedback">
@@ -185,10 +183,7 @@ const LaboratorySignUp: React.FC = () => {
                         className={`form-control ${
                           errors.password ? "is-invalid" : ""
                         }`}
-                        {...register("password", {
-                          required:
-                            "Password must contain an uppercase letter, lowercase letter, symbols, and numbers",
-                        })}
+                        {...register("password")}
                       />
                       <button
                         type="button"
@@ -198,7 +193,9 @@ const LaboratorySignUp: React.FC = () => {
                       </button>
                     </div>
                     {errors.password && (
-                      <p className="text-danger">{errors.password.message}</p>
+                      <div className="text-danger">
+                        {errors.password.message}
+                      </div>
                     )}
                   </div>
 
@@ -211,9 +208,7 @@ const LaboratorySignUp: React.FC = () => {
                         className={`form-control ${
                           errors.confirmPassword ? "is-invalid" : ""
                         }`}
-                        {...register("confirmPassword", {
-                          required: "Confirm password is required",
-                        })}
+                        {...register("confirmPassword")}
                       />
                       <button
                         type="button"
@@ -225,9 +220,9 @@ const LaboratorySignUp: React.FC = () => {
                       </button>
                     </div>
                     {errors.confirmPassword && (
-                      <p className="text-danger">
+                      <div className="text-danger">
                         {errors.confirmPassword.message}
-                      </p>
+                      </div>
                     )}
                   </div>
 

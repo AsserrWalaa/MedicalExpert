@@ -55,10 +55,7 @@ const AdminSignIn: React.FC = () => {
       console.log(response.data);
 
       if (response.data.status === "error") {
-        // Handle specific error response from the API
-        setErrorMessage(
-          "Invalid credentials. Please check your email and password."
-        );
+        setErrorMessage("Please check your email and password.");
         return; // Exit early
       }
       localStorage.setItem("user", JSON.stringify(admin));
@@ -93,6 +90,14 @@ const AdminSignIn: React.FC = () => {
             <div className="card mt-5">
               <div className="card-body">
                 <h2 className="card-title text-center">Admin Sign In</h2>
+                {/* Error Message */}
+                {errorMessage && (
+                  <div className="alert alert-danger text-center mt-3">
+                    {errorMessage}
+                  </div>
+                )}
+                {/* Error message is shown as an alert directly below the sign-in button */}
+
                 <form onSubmit={handleSubmit(onSubmit)}>
                   {/* Email */}
                   <div className="mb-3">
@@ -121,7 +126,7 @@ const AdminSignIn: React.FC = () => {
                           errors.password ? "is-invalid" : ""
                         }`}
                         {...register("password", {
-                          required: "Password is required",
+                          required: "Password is required ",
                         })}
                       />
                       <button
@@ -131,9 +136,9 @@ const AdminSignIn: React.FC = () => {
                         {passwordVisible ? "Hide" : "Show"}
                       </button>
                     </div>
-                    <div className="invalid-feedback">
-                      {errors.password?.message}
-                    </div>
+                    {errors.password && (
+                      <p className="text-danger">{errors.password.message}</p>
+                    )}
                   </div>
 
                   {/* Remember Me */}
@@ -155,13 +160,6 @@ const AdminSignIn: React.FC = () => {
                       {loading ? "Signing In..." : "Sign In"}
                     </button>
                   </div>
-
-                  {/* Error Message */}
-                  {errorMessage && (
-                    <div className="text-danger text-center mt-3">
-                      {errorMessage}
-                    </div>
-                  )}
 
                   {/* Forgot Password */}
                   <div className="text-center mt-3">

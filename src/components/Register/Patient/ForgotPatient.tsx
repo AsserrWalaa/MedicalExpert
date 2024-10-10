@@ -76,7 +76,7 @@ const ForgotPasswordRequest: React.FC = () => {
   };
 
   return (
-    <div className="vh-100 user-backgrond">
+    <div className="vh-100 user-">
       <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-6">

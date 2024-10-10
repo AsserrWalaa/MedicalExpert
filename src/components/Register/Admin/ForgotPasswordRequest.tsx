@@ -53,8 +53,12 @@ const ForgotPasswordRequest: React.FC = () => {
         console.error("Error sending OTP:", error);
         if (axios.isAxiosError(error)) {
           const errorMsg =
-            error.response?.data?.message ||
-            "Failed to send OTP. Please try again.";
+            error.response?.status === 404
+              ? "Check your email. It seems to be incorrect or not registered."
+              : error.response?.status === 500
+              ? "Please check your email and try again."
+              : error.response?.data?.message ||
+                "Failed to send OTP. Please try again.";
           setError("email", { type: "manual", message: errorMsg });
           setMessage(errorMsg);
           setMessageType("error");
@@ -107,9 +111,6 @@ const ForgotPasswordRequest: React.FC = () => {
                       {...register("email", { required: "Email is required" })}
                       readOnly={otpSent}
                     />
-                    <div className="invalid-feedback">
-                      {errors.email?.message}
-                    </div>
                   </div>
 
                   <div className="d-grid">

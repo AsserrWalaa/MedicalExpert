@@ -64,7 +64,7 @@ const PatientSignIn: React.FC = () => {
         setErrorMessage(null);
         navigate("/patient-home");
       } else {
-        setErrorMessage(response.data.message || "Invalid email or password.");
+        setErrorMessage("Please check email or password."); // Always display this message for invalid credentials
         setSuccessMessage(null);
       }
     } catch (error) {
@@ -173,7 +173,7 @@ const PatientSignIn: React.FC = () => {
                   </div>
 
                   {/* Don't have an account */}
-                  <div className="text-center mt-3">
+                  <div className="text-center mt-2">
                     <button
                       type="button"
                       className="btn btn-link"
