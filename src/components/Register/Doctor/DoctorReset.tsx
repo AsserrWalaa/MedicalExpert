@@ -25,7 +25,7 @@ const schema = z.object({
 
 type SchemaType = z.infer<typeof schema>;
 
-const Reset: React.FC = () => {
+const DoctorReset: React.FC = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
@@ -51,19 +51,16 @@ const Reset: React.FC = () => {
     const newOtp = [...otp];
     newOtp[index] = value;
 
-    // Move to the next input if a digit is entered and stay within the bounds of OTP length
     if (value.length === 1 && index < 5) {
       const nextInput = document.getElementById(`otp-${index + 1}`);
       nextInput?.focus();
     }
 
-    // Move to the previous input if backspace is pressed and stay within the bounds
     if (value.length === 0 && index > 0) {
       const prevInput = document.getElementById(`otp-${index - 1}`);
       prevInput?.focus();
     }
 
-    // Set the OTP value
     setOtp(newOtp);
     setValue("otp", newOtp.join(""));
   };
@@ -84,7 +81,7 @@ const Reset: React.FC = () => {
 
     try {
       const response = await axios.post(
-        "https://admin.medicalexpertise.net/api/doctor/password/reset",
+        "https://admin.medicalexpertise.net/api/lab/password/reset",
         apiData
       );
 
@@ -94,7 +91,7 @@ const Reset: React.FC = () => {
       setLoading(false);
 
       setTimeout(() => {
-        navigate("/doctor-signin");
+        navigate("/lab-signin");
       }, 2000);
     } catch (error: any) {
       setLoading(false);
@@ -153,8 +150,6 @@ const Reset: React.FC = () => {
                           id={`otp-${index}`}
                           type="text"
                           maxLength={1}
-                          required
-                          pattern="\d*"
                           className={`form-control mx-1 border-primary fw-bold text-primary text-center ${
                             errors.otp ? "is-invalid" : ""
                           }`}
@@ -165,11 +160,6 @@ const Reset: React.FC = () => {
                               e.target.value.replace(/\D/g, "")
                             )
                           }
-                          onInput={(e) => {
-                            const value = e.currentTarget.value;
-                            // Only allow numeric characters
-                            e.currentTarget.value = value.replace(/\D/g, "");
-                          }}
                         />
                       ))}
                     </div>
@@ -251,4 +241,4 @@ const Reset: React.FC = () => {
   );
 };
 
-export default Reset;
+export default DoctorReset;
